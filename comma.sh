@@ -34,6 +34,8 @@ TODO:
 	
 	- don't run absolute paths in safe mode (then it wouldn't be safe)
 	
+	- add more commands into safe mode (chmod, rm, mv, cp, ln, ...)
+	
 	- make some kind of persistent storage of internal variables
 		(f.ex.: cs_AUTOENABLE)
 	
@@ -61,6 +63,10 @@ TODO:
 	
 	- add support for coloring output: white for stdout, red for stderr
 		(I can do it, but I cannot change directory while doing that)
+		
+	- is the lock file really necessary? maybe a variable would be sufficient
+		right now, this commands works fine:
+		false || true && ((echo a; (echo b; echo c); echo $(echo d)) && echo "$(echo $(echo $(echo e)))"; echo f) && echo g
 EOF
 fi
 
