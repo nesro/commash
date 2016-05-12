@@ -1,0 +1,57 @@
+,: Commash has been loaded. But it's disabled by default.
+,: You can enable it by running: ", enable" (or just ", e" )
+,: Autoenabling commash in the first PROMPT_COMMAND
+n@t:~$ cd /tmp || exit
+n@t:/tmp$ touch test
+n@t:/tmp$ ,safe
+,: safe mode enabled. PATH is "/home/n/.commash/safe:/home/n/bin:/home/n/.rvm/gems/ruby-2.2.1/bin:/home/n/.rvm/gems/ruby-2.2.1@global/bin:/home/n/.rvm/rubies/ruby-2.2.1/bin:/home/n/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/n/.rvm/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/n/.rvm/bin:/home/n/Dropbox/g/b/googletest/googletest/scripts:/home/n/.rvm/bin"
+n@t:/tmp$ rm test
+,safe rm: "test"
+n@t:/tmp$ ,nsafe
+,: safe mode disabled. PATH is "/home/n/bin:/home/n/.rvm/gems/ruby-2.2.1/bin:/home/n/.rvm/gems/ruby-2.2.1@global/bin:/home/n/.rvm/rubies/ruby-2.2.1/bin:/home/n/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/n/.rvm/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/n/.rvm/bin:/home/n/Dropbox/g/b/googletest/googletest/scripts:/home/n/.rvm/bin"
+n@t:/tmp$ rm test
+n@t:/tmp$ 
+n@t:/tmp$ echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz
+raz
+n@t:/tmp$ ,debug
+,: commash debug has been set to: "1"
+n@t:/tmp$ echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz
+,: commash prevented execution of: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
+,: going to the debugger mode
+,dbg cmd: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
+,: Now what? show [a]st, e[x]it debugger, execute some [p]ipelines, do [n]othing: p,dmg: Showing simple commands saved from bash:
+0="echo -e "raz\ndva\ntri""
+1="egrep --color=auto "raz|dva""
+2="grep --color=auto raz"
+,dmg: How many pipelines you want to run: 2
+
+,dbg: executing: "echo -e "raz
+dva
+tri" | egrep --color=auto "raz|dva""
+raz
+dva
+n@t:/tmp$ echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz
+,: commash prevented execution of: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
+,: going to the debugger mode
+,dbg cmd: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
+,: Now what? show [a]st, e[x]it debugger, execute some [p]ipelines, do [n]othing: a
+,: Showing ast (output from python script):
+
+PipelineNode(pos=(0, 52), parts=[
+  CommandNode(pos=(0, 23), parts=[
+    WordNode(pos=(0, 4), word='echo'),
+    WordNode(pos=(5, 7), word='-e'),
+    WordNode(pos=(8, 23), word='razndvantri'),
+  ]),
+  PipeNode(pipe='|', pos=(24, 25)),
+  CommandNode(pos=(26, 41), parts=[
+    WordNode(pos=(26, 31), word='egrep'),
+    WordNode(pos=(32, 41), word='raz|dva'),
+  ]),
+  PipeNode(pipe='|', pos=(42, 43)),
+  CommandNode(pos=(44, 52), parts=[
+    WordNode(pos=(44, 48), word='grep'),
+    WordNode(pos=(49, 52), word='raz'),
+  ]),
+])
+
