@@ -19,11 +19,12 @@ n@t:/tmp$ echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz
 ,: commash prevented execution of: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
 ,: going to the debugger mode
 ,dbg cmd: "echo -e "raz\ndva\ntri" | egrep "raz|dva" | grep raz"
-,: Now what? show [a]st, e[x]it debugger, execute some [p]ipelines, do [n]othing: p,dmg: Showing simple commands saved from bash:
+,: Now what? show [a]st, e[x]it debugger, execute some [p]ipelines, do [n]othing: p
+,dbg: Showing simple commands saved from bash:
 0="echo -e "raz\ndva\ntri""
 1="egrep --color=auto "raz|dva""
 2="grep --color=auto raz"
-,dmg: How many pipelines you want to run: 2
+,dbg: How many pipelines you want to run: 2
 
 ,dbg: executing: "echo -e "raz
 dva

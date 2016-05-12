@@ -492,14 +492,14 @@ csfunc_inside_debugger() {
 		
 		if [[ $key == p ]]; then
 			
-			echo ",dmg: Showing simple commands saved from bash:"
+			echo "\n,dbg: Showing simple commands saved from bash:"
 			if (( cspc_command_cnt > 0 )); then
 				for (( cspc_i=0 ; cspc_i < cspc_command_cnt ; cspc_i++ )); do
 					echo "$cspc_i=\"${cs_command_arr[$cspc_i]}\""
 				done
 			fi
 		
-			echo -n ",dmg: How many pipelines you want to run: "
+			echo -n ",dbg: How many pipelines you want to run: "
 			read -r pipelines
 			
 			pipcmd="${cs_command_arr[0]}"
