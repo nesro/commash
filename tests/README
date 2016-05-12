@@ -1,0 +1,34 @@
+# TODO: add tests. I don't think we can do it in a nice way.
+# my bet is that we will need to use expect ( http://expect.sourceforge.net/ )
+# or something similar
+
+# there must never be a difference between running a command with enabled
+# and disabled commash when debugger is off
+
+# be able to touch and rm files in pipes
+touch a | touch b | touch c
+rm a | rm b | rm c
+
+
+#-----------
+# safe mode
+- rm (instead of delete, just put it into trash)
+- cp
+- mv
+- cp+mv (don't rewrite anything, just put it into trash)
+- chmod (explain what will happen)
+
+
+- create a trash for "deleted files" and log files "for edited files (chmod)
+
+#---------
+# debug mode
+- be able to run partial command
+- show ast?
+
+
+#----------
+# show rc
+- show rc after ctrl+c
+- show rc other than 0 after every executed command (even from debugger)
+
