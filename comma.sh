@@ -573,7 +573,7 @@ csfunc_prompt() {
 
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
-
+	
 	if [[ $cs_ENABLED == 0 ]]; then
 		return 0 # commash is disabled
 	fi
@@ -584,13 +584,18 @@ csfunc_debug_trap() {
 	fi
 
 	# TODO: this one is really usefull, make some flag to turn it on easily
-	#echo ",: $BASH_COMMAND" 
+	#echo ",BC: $BASH_COMMAND cc:$csfunc_catch_command" 
 	
 	# If we control-c a command, we jump again into the debug trap
 	# this is the right place to explain what happened
 	if (( cs_debug_trap_rc == 130 )) && (( cs_debug_trap_rc_ctrlc == 0 )); then
 		cs_debug_trap_rc_ctrlc=1
 		csfunc_rc $cs_debug_trap_rc
+
+		# we need to "clean up" here
+		csfunc_catch_command=1
+		$RM -f ~/.commash/lock
+		return 1
 	fi	
 	
 	if [[ -n $COMP_LINE ]]; then
@@ -611,13 +616,13 @@ csfunc_debug_trap() {
 	# bash is executing prompt command
 	# XXX: see below
 	if [[ $BASH_COMMAND == "$PROMPT_COMMAND" ]]; then
+		echo ",debug trap: prompt_command"
 		csfunc_catch_command=0
 		return 0
 	elif [[ $csfunc_catch_command == 1 ]]; then # Run this code only once per interactive command
 		csfunc_catch_command=0
 
-
-		# If we ctrlc this command, show is the warning
+		# If we ctrlc this command, show the warning
 		cs_debug_trap_rc_ctrlc=0
 
 		# This lock guarantee that we will eval only once per promp.
@@ -644,16 +649,20 @@ csfunc_debug_trap() {
 
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
-
 			
 			# XXX: we may wrap eval with in_eval variables and disable debug
 			# trap for them?
 
+			#echo ",eval: \"$cmd\" _=\"$cs_last\""
 			
-			#csfunc_in_eval=1					
-			eval "$cmd"
-			cs_rc=$?
-			#csfunc_in_eval=0
+			cs_in_eval=1 #TODO: this is not used anywhere atm	
+			eval ": $cs_last; $cmd; cs_bash_internals=\"\${_}CSDELIMETER\${?}\";"
+			cs_in_eval=0
+
+			cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
+			cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
+
+			#echo ", bi=$cs_bash_internals _=$cs_last ?=$cs_rc"
 		
 			if (( cs_rc > 0 )); then
 				echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
