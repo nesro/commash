@@ -67,6 +67,7 @@ TODO:
 	- is the lock file really necessary? maybe a variable would be sufficient
 		right now, this commands works fine:
 		false || true && ((echo a; (echo b; echo c); echo $(echo d)) && echo "$(echo $(echo $(echo e)))"; echo f) && echo g
+	- fix: bash: return: can only `return' from a function or sourced script
 EOF
 fi
 
@@ -191,6 +192,12 @@ sc_debug=0
 #sc_args="disable=SC2164"
 
 [[ $cs_INTERNAL_DEBUG =~ globvars|all ]] && set +xv
+
+
+#-------------------------------------------------------------------------------
+# source other parts
+
+#source "$cs_ROOTDIR/cs_readline.sh"
 
 
 #-------------------------------------------------------------------------------
@@ -465,6 +472,9 @@ cs_explain_rc() {
 	130)
 		echo "(Script terminated by Control-C)"
 		;;
+	148)
+		echo "(Control-Z)"
+		;;
 	*)
 		echo "(no explanation)"
 		;;
@@ -537,11 +547,40 @@ cspc_first=1
 
 cspc_command_cnt=0
 
+
+
+#-------------------------------------------------------------------------------
+
+csfunc_locked() {
+	if [[ -f ~/.commash/lock ]]; then
+		return 0 # true, not locked 
+	else
+		return 1
+	fi
+}
+
+csfunc_lock() {
+	$TOUCH ~/.commash/lock
+}
+
+csfunc_unlock() {
+	$RM -f ~/.commash/lock
+}
+
+#-------------------------------------------------------------------------------
+# These functions are executed with every prompt. They are two because we
+# execute previous PROMPT_COMMANDs between them:
+# csfunc_preprompt; <old PROMPT_COMMAND>; csfunc_prompt
+
+csfunc_preprompt() {
+	csfunc_inside=1
+}
+
 # This function is executed by BASH every time the prompt is about to print.
 # We use cspc_
 csfunc_prompt() {
 	csfunc_rc=$? # This must be the first command. Even before the debug.
-	csfunc_inside=1
+
 
 	if [[ $cs_AUTOENABLE == 1 ]] && [[ $cspc_first == 1 ]]; then
 		cspc_first=0
@@ -551,118 +590,146 @@ csfunc_prompt() {
 		cs_ENABLED=1
 	fi
 
-	if (( csfunc_rc != 130 )); then
-		cs_debug_trap_rc_ctrlc=0
-	fi
+	# XXX: do I need to reset this here?
+	#if (( csfunc_rc != 130 )); then
+	#	cs_debug_trap_rc_ctrlc=0
+	#fi
 
-
-	$RM -f ~/.commash/lock
+	csfunc_unlock
+	
 
 	if [[ $cs_DEBUGGER == 1 ]]; then
 		csfunc_inside_debugger
 	fi
 	cspc_command_cnt=0
 
+
+
 	# This will help us indicate the first run of the DEBUG trap.
 	# The debug trap is called more than once per command.
 	# This must be the last command
     csfunc_catch_command=1
+    
+    
     csfunc_inside=0
 }
+#-------------------------------------------------------------------------------
 
+
+#-------------------------------------------------------------------------------
+csfunc_debug_trap_enable() {
+	PROMPT_COMMAND_BACKUP="$PROMPT_COMMAND"
+	PROMPT_COMMAND="csfunc_preprompt;$PROMPT_COMMAND;csfunc_prompt"
+	trap 'csfunc_debug_trap' DEBUG
+	shopt -s extdebug
+	$RM -f ~/.commash/lock
+}
+csfunc_debug_trap_disable() {
+	PROMPT_COMMAND="$PROMPT_COMMAND_BACKUP"
+	trap - DEBUG
+	shopt -u extdebug
+	$RM -f ~/.commash/lock
+}
+#-------------------------------------------------------------------------------
+
+csfunc_restore_internals() {
+	return $1
+}
 
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
 	
+	#---------------------------------------------------------------------------
+	
+	# If we control-c a command, we jump again into the debug trap
+	# this is the right place to explain what happened.
+	if (( cs_debug_trap_rc == 130 )) && (( cs_debug_trap_rc_ctrlc == 0 )); then
+		cs_debug_trap_rc_ctrlc=1
+		csfunc_rc $cs_debug_trap_rc
+		csfunc_unlock
+		csfunc_inside=0
+		return 1
+	fi
+	
+	
+	#---------------------------------------------------------------------------
+	# These are cases where we execute the command.
+
+	# Just execute the command if commash is not enabled
 	if [[ $cs_ENABLED == 0 ]]; then
 		return 0 # commash is disabled
 	fi
 
+	# bash executes ~/.bash_logout when login shell exits. We have a command
+	# here to know that we're going to exit.
 	if [[ $BASH_COMMAND == "cs_LOGOUT=1" ]]; then
 		cs_ENABLED=0
 		return 0
 	fi
 
-	# TODO: this one is really usefull, make some flag to turn it on easily
-	#echo ",BC: $BASH_COMMAND cc:$csfunc_catch_command" 
-	
-	# If we control-c a command, we jump again into the debug trap
-	# this is the right place to explain what happened
-	if (( cs_debug_trap_rc == 130 )) && (( cs_debug_trap_rc_ctrlc == 0 )); then
-		cs_debug_trap_rc_ctrlc=1
-		csfunc_rc $cs_debug_trap_rc
-
-		# we need to "clean up" here
-		csfunc_catch_command=1
-		$RM -f ~/.commash/lock
-		return 1
-	fi	
-	
-	if [[ -n $COMP_LINE ]]; then
-		return 0 # bash is completing
-	fi
-	
 	# If we're executing internal commash functions, don't track them.
 	if [[ $BASH_COMMAND =~ ^csfunc_ ]] || [[ $csfunc_inside == 1 ]]; then
 		return 0
 	fi
 	
+	# This is the case when you press the <tab> key and bash is trying to
+	# autocomplete.
+	if [[ -n $COMP_LINE ]]; then
+		return 0
+	fi
+	
+	#---------------------------------------------------------------------------
+	
+	
+	
+	#---------------------------------------------------------------------------
+	
 	# Save BASH_COMMAND for allow debuger partial execution
 	cs_command_arr[$cspc_command_cnt]="$BASH_COMMAND"
 	(( cspc_command_cnt++ ))
-		
+	
+	#---------------------------------------------------------------------------	
 		
 
-	# bash is executing prompt command
-	# XXX: see below
-	if [[ $BASH_COMMAND == "$PROMPT_COMMAND" ]]; then
-		echo ",debug trap: prompt_command"
+	if (( csfunc_catch_command == 1 )) && [[ ! -f ~/.commash/lock ]]; then
 		csfunc_catch_command=0
-		return 0
-	elif [[ $csfunc_catch_command == 1 ]]; then # Run this code only once per interactive command
-		csfunc_catch_command=0
+		$TOUCH ~/.commash/lock
+		
 
 		# If we ctrlc this command, show the warning
 		cs_debug_trap_rc_ctrlc=0
 
-		# This lock guarantee that we will eval only once per promp.
-		# It may be very tricky to handle subshells well
-		if [[ -f ~/.commash/lock ]]; then
-			return 1
-		else
-			$TOUCH ~/.commash/lock
-		fi
 		
-		
-	
 		cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
-		
+		echo "$(date +%Y-%m-%d-%H-%M-%S-%N) \"$cmd\"" >> ~/.commash/log
 		
 		# ShellCheck
 		if ! sc_check_wrapper "$cmd"; then
 			return 1
 		fi
 		
-		
-		#shopt -s lastpipe
-		#set +m
-
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
 			
-			# XXX: we may wrap eval with in_eval variables and disable debug
-			# trap for them?
+			#-------------------------------------------------------------------
+			# This is where the commands are executed.
+			# First, we want to exetuce a "blank" command to set the $_ variable.
+			# Second, the actual command is executed.
+			# Third, we want to save both $_ and $? variables.
+			eval "
 
-			#echo ",eval: \"$cmd\" _=\"$cs_last\""
+csfunc_restore_internals $cs_rc $cs_last
+
+$cmd
+
+cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
+
+			"
 			
-			cs_in_eval=1 #TODO: this is not used anywhere atm	
-			eval ": $cs_last; $cmd; cs_bash_internals=\"\${_}CSDELIMETER\${?}\";"
-			cs_in_eval=0
-
+			#-------------------------------------------------------------------
+			
 			cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
 			cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
-
-			#echo ", bi=$cs_bash_internals _=$cs_last ?=$cs_rc"
 		
 			if (( cs_rc > 0 )); then
 				echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
@@ -675,60 +742,34 @@ csfunc_debug_trap() {
 			cs_DEBUGGER=1
 		fi # cs_DEBUG == 0
 		
-		# don't run the program again
-		return 1
-	else
-		# these are the rest of the piplenies:
-		# if the command is:
-		# cmd1 | cmd2 | cmd3
-		# this will be executed for cmd2 and cmd3		
-		return 1
 	fi
+	
+	#---------------------------------------------------------------------------
+	
+	return 1
 }
 
 #-------------------------------------------------------------------------------
 
 cs_main() {
 	cs_run_install_if_needed
-
-	# This is needed if we want to prevent executing any command without sending
-	# CtrlC signal.
-	shopt -s extdebug
-	
-	# This is not really necessary at the moment.
-	# But I want to have it working even with this turned on
-	set -o functrace
-
-
-	# This issue is fixed now by writing:
-	# cs_LOGOUT=1
-	# to .bash_logout We can detect it and turn commash off.
-	#
-	# FIXME: if we control-d from bash, it triggers debug trap and executes
-	# the last command. use control-x instead
-	#
-	# Ultimately, we could use "stty eof undef", but that would change other
-	# things too (like python shell) and we don't want that	
-	#set -o ignoreeof
-	#bind '"\C-x":"\C-u\C-k,exit\n"'
-	
-	# FIXME: I had something already in there and it was broken.
-	#PROMPT_COMMAND="${PROMPT_COMMAND};cs_prompt_command"
-	PROMPT_COMMAND="csfunc_prompt"
-	trap 'csfunc_debug_trap' DEBUG
-
+	csfunc_debug_trap_enable
 	
 	
-	cat <<EOF
-,: Commash has been loaded. But it's disabled by default.
-,: You can enable it by running: ", enable" (or just ", e" )
-EOF
+#	cat <<EOF
+#,: Commash has been loaded. But it's disabled by default.
+#,: You can enable it by running: ", enable" (or just ", e" )
+#EOF
 
 }
+
+
 
 #-------------------------------------------------------------------------------
 
 cs_main
+
+#-------------------------------------------------------------------------------
 
 if false; then
 
