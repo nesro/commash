@@ -624,13 +624,13 @@ csfunc_debug_trap_enable() {
 	PROMPT_COMMAND="csfunc_preprompt;$PROMPT_COMMAND;csfunc_prompt"
 	trap 'csfunc_debug_trap' DEBUG
 	shopt -s extdebug
-	$RM -f ~/.commash/lock
+	$RM -f $cs_LOCKFILE
 }
 csfunc_debug_trap_disable() {
 	PROMPT_COMMAND="$PROMPT_COMMAND_BACKUP"
 	trap - DEBUG
 	shopt -u extdebug
-	$RM -f ~/.commash/lock
+	$RM -f $cs_LOCKFILE
 }
 #-------------------------------------------------------------------------------
 
@@ -695,7 +695,7 @@ csfunc_debug_trap() {
 
 	if (( csfunc_catch_command == 1 )) && [[ ! -f ~/.commash/lock ]]; then
 		csfunc_catch_command=0
-		$TOUCH ~/.commash/lock
+		csfunc_lock
 		
 
 		# If we ctrlc this command, show the warning
@@ -703,7 +703,7 @@ csfunc_debug_trap() {
 
 		
 		cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
-		echo "$(date +%Y-%m-%d-%H-%M-%S-%N) \"$cmd\"" >> ~/.commash/log
+		
 		
 		# ShellCheck
 		if ! sc_check_wrapper "$cmd"; then
@@ -712,6 +712,9 @@ csfunc_debug_trap() {
 		
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
+			
+			# generate timestamp and use it as command identifier (for hooks)
+			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
 			
 			#-------------------------------------------------------------------
 			# This is where the commands are executed.
@@ -732,6 +735,9 @@ cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 			
 			cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
 			cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
+		
+			# FIXME: multiline commands?
+			echo "$cs_timestamp \"$cmd\" $cs_rc" >> $cs_LOGFILE
 		
 			if (( cs_rc > 0 )); then
 				echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
