@@ -1,4 +1,1 @@
-2016-05-23-20-42-46-499344339 "git add -A"
-2016-05-23-20-43-50-251618452 "git commit -am "added basic logging, restoring _ and ? variables, turned off functrace because it really can broke everyting""
-2016-05-23-20-43-53-216361226 "git commit -am "added basic logging, restoring _ and ? variables, turned off functrace because it really can broke everyting""
-2016-05-23-20-43-54-605177169 "git commit -am "added basic logging, restoring _ and ? variables, turned off functrace because it really can broke everyting""
+2016-05-23-20-48-29-517597608 "git commit -am "ignore log file, use variables for log and lock files""

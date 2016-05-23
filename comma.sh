@@ -177,13 +177,15 @@ escape_sed() {
 cs_ENABLED=0
 cs_ROOTDIR=~/.commash
 cs_COMMA_SH=$cs_ROOTDIR/comma.sh
-cs_LOCKFILE=$cs_ROOTDIR/lock
 cs_SAFEDIR=$cs_ROOTDIR/safe
 cs_SAFEDIR_SED=$(echo "$cs_SAFEDIR" | escape_sed)
 cs_RC_HOOK="if [[ -f $cs_COMMA_SH ]]; then source $cs_COMMA_SH; fi"
 cs_RC_HOOK_GREP="if \[\[ -f $cs_COMMA_SH \]\]\; then source $cs_COMMA_SH\; fi"
 cs_RC_HOOK_SED=$(echo "$cs_RC_HOOK_GREP" | escape_sed)
 cs_LOGOUT_HOOK="cs_LOGOUT=1"
+
+cs_LOCKFILE=$cs_ROOTDIR/lock.commash
+cs_LOGFILE=$cs_ROOTDIR/log.commash
 
 # ShellCheck
 sc_check=1 # check every command with ShellCheck before executing
@@ -560,11 +562,11 @@ csfunc_locked() {
 }
 
 csfunc_lock() {
-	$TOUCH ~/.commash/lock
+	$TOUCH $cs_LOCKFILE
 }
 
 csfunc_unlock() {
-	$RM -f ~/.commash/lock
+	$RM -f $cs_LOCKFILE
 }
 
 #-------------------------------------------------------------------------------
