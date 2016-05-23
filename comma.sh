@@ -53,7 +53,7 @@ TODO:
 	
 	- refactor function names and variables to be consistent
 	
-	- detect things like:
+	- DONE detect things like:
 		- $ cd /a
 		- $ cd /b
 		- $ cd /a
@@ -661,15 +661,15 @@ csfunc_hook_add_after() {
 }
 
 # The hook functions are called like this:
-# <hook> <command timestamp>
+# <hook> <command timestamp> <command>
 csfunc_hook_iterate_before() {
 	for i in "${!cs_HOOKS_BEFORE[@]}"; do
-		${cs_HOOKS_BEFORE[$i]} $1
+		${cs_HOOKS_BEFORE[$i]} "$1" "$2"
 	done
 }
 csfunc_hook_iterate_after() {
 	for i in "${!cs_HOOKS_AFTER[@]}"; do
-		${cs_HOOKS_AFTER[$i]} $1
+		${cs_HOOKS_AFTER[$i]} "$1" "$2"
 	done
 }
 
@@ -762,7 +762,7 @@ csfunc_debug_trap() {
 			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
 			
 			
-			csfunc_hook_iterate_before $cs_timestamp
+			csfunc_hook_iterate_before "$cs_timestamp" "$cmd"
 			
 			#-------------------------------------------------------------------
 			# This is where the commands are executed.
@@ -785,7 +785,7 @@ cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 			# FIXME: multiline commands?
 			echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
 			
-			csfunc_hook_iterate_after $cs_timestamp
+			csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
 			
 			#-------------------------------------------------------------------		
 		
