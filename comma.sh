@@ -71,6 +71,8 @@ TODO:
 	- fix: bash: return: can only `return' from a function or sourced script
 	
 	- support more languages (english and czech)
+	
+	- todo: make an option to suppress/disable hooks/tips
 EOF
 fi
 
