@@ -67,7 +67,10 @@ TODO:
 	- is the lock file really necessary? maybe a variable would be sufficient
 		right now, this commands works fine:
 		false || true && ((echo a; (echo b; echo c); echo $(echo d)) && echo "$(echo $(echo $(echo e)))"; echo f) && echo g
+		
 	- fix: bash: return: can only `return' from a function or sourced script
+	
+	- support more languages (english and czech)
 EOF
 fi
 
@@ -632,6 +635,46 @@ csfunc_debug_trap_disable() {
 	shopt -u extdebug
 	$RM -f $cs_LOCKFILE
 }
+
+#-------------------------------------------------------------------------------
+# Hooks.
+# We want to make things modular. Some basic and checking functionality should
+# be easily added.
+
+cs_HOOKS_BEFORE=()
+cs_HOOKS_AFTER=()
+cs_HOOKS_DIR=$cs_ROOTDIR/hooks
+
+csfuncs_hook_source() {
+	for hookfile in $cs_HOOKS_DIR/cshook_*.sh; do
+		source $hookfile
+	done
+}
+
+csfunc_hook_add_before() {
+	cs_HOOKS_BEFORE+=("$1")
+}
+csfunc_hook_add_after() {
+	cs_HOOKS_AFTER+=("$1")
+}
+
+# The hook functions are called like this:
+# <hook> <command timestamp>
+csfunc_hook_iterate_before() {
+	for i in "${!cs_HOOKS_BEFORE[@]}"; do
+		${cs_HOOKS_BEFORE[$i]} $1
+	done
+}
+csfunc_hook_iterate_after() {
+	for i in "${!cs_HOOKS_AFTER[@]}"; do
+		${cs_HOOKS_AFTER[$i]} $1
+	done
+}
+
+csfunc_hook_init() {
+	csfuncs_hook_source
+}
+
 #-------------------------------------------------------------------------------
 
 csfunc_restore_internals() {
@@ -716,6 +759,9 @@ csfunc_debug_trap() {
 			# generate timestamp and use it as command identifier (for hooks)
 			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
 			
+			
+			csfunc_hook_iterate_before $cs_timestamp
+			
 			#-------------------------------------------------------------------
 			# This is where the commands are executed.
 			# First, we want to exetuce a "blank" command to set the $_ variable.
@@ -731,14 +777,17 @@ cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 
 			"
 			
-			#-------------------------------------------------------------------
-			
 			cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
 			cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
-		
+			
 			# FIXME: multiline commands?
-			echo "$cs_timestamp \"$cmd\" $cs_rc" >> $cs_LOGFILE
+			echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
+			
+			csfunc_hook_iterate_after $cs_timestamp
+			
+			#-------------------------------------------------------------------		
 		
+			# this could be a hook
 			if (( cs_rc > 0 )); then
 				echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
 			fi
@@ -761,6 +810,7 @@ cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 
 cs_main() {
 	cs_run_install_if_needed
+	csfunc_hook_init
 	csfunc_debug_trap_enable
 	
 	
