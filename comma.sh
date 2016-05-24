@@ -400,49 +400,6 @@ alias ,n=",nd"
 # commash debug trap and prompt_command wrappers
 #-------------------------------------------------------------------------------
 
-#
-#
-cs_explain_rc() {
-	local rc=$1
-	
-	case $rc in
-	1)
-		echo "(General error)"
-		;;
-	2)
-		# FIXME: this is not working properly, because command with this rc
-		# is not in the history
-		echo "(Misuse of shell builtins)"
-		;;
-	126)
-		echo "(Command invoked cannot execute)"
-		;;
-	127)
-		echo "(Command not found)"
-		;;
-	# TODO: Parse and show all signals
-	# 12[8-9]|13[0-9])
-	#	echo "(Fatal error signal: 0)"
-	#	;;
-	130)
-		echo "(Script terminated by Control-C)"
-		;;
-	148)
-		echo "(Control-Z)"
-		;;
-	*)
-		echo "(no explanation)"
-		;;
-	esac
-}
-
-csfunc_rc() {
-	local rc=$1
-	
-	echo ",: return code warning: \$? == $rc $(cs_explain_rc $rc)"
-}
-
-
 csfunc_inside_debugger() {
 	cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
 	
@@ -545,11 +502,6 @@ csfunc_prompt() {
 		cs_ENABLED=1
 	fi
 
-	# XXX: do I need to reset this here?
-	#if (( csfunc_rc != 130 )); then
-	#	cs_debug_trap_rc_ctrlc=0
-	#fi
-
 	csfunc_unlock
 	
 
@@ -646,7 +598,9 @@ csfunc_debug_trap() {
 	# this is the right place to explain what happened.
 	if (( cs_debug_trap_rc == 130 )) && (( cs_debug_trap_rc_ctrlc == 0 )); then
 		cs_debug_trap_rc_ctrlc=1
-		csfunc_rc $cs_debug_trap_rc
+		if type csfunc_rc >/dev/null 2>&1; then
+			csfunc_rc $cs_debug_trap_rc
+		fi
 		csfunc_unlock
 		csfunc_inside=0
 		return 1
@@ -734,13 +688,6 @@ csfunc_debug_trap() {
 				echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
 			
 				csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
-			
-				#-------------------------------------------------------------------		
-		
-				# this could be a hook
-				if (( cs_rc > 0 )); then
-					echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
-				fi
 			fi
 		else
 			echo ",: commash prevented execution of: \"$cmd\""
