@@ -192,11 +192,7 @@ cs_LOGOUT_HOOK="cs_LOGOUT=1"
 cs_LOCKFILE=$cs_ROOTDIR/lock.commash
 cs_LOGFILE=$cs_ROOTDIR/log.commash
 
-# ShellCheck
-sc_check=1 # check every command with ShellCheck before executing
-sc_path=~/.cabal/bin/shellcheck
-sc_debug=0
-#sc_args="disable=SC2164"
+
 
 [[ $cs_INTERNAL_DEBUG =~ globvars|all ]] && set +xv
 
@@ -403,54 +399,6 @@ alias ,n=",nd"
 #-------------------------------------------------------------------------------
 # commash debug trap and prompt_command wrappers
 #-------------------------------------------------------------------------------
-
-sc_check_wrapper() {
-	local cmd="$1"
-
-	if [[ $sc_check == 1 ]]; then
-		# ShellCheck check
-		[[ $sc_debug == 1 ]] && set -xv
-		# ShellCheck needs to get a script. So we create one with shebang,
-		# variables and the actual command
-		#sc_out=$($sc_path <(echo '#!/bin/bash'; echo "$(set -o posix ; set)"; echo "$cmd") 2>&1)
-	
-		sc_out=$($sc_path <(echo '#!/bin/bash'; echo "$cmd") 2>&1)
-		sc_rc=$?
-		sc_out=$(echo "$sc_out" | tail -n +3)
-		[[ $sc_debug == 1 ]] && set +xv
-
-		if (( sc_rc > 0 )); then
-			echo -e ",: ShellCheck: \n$sc_out"
-		
-			echo -n ",: Now what? [r]un, [s]top: "
-			while :; do
-				read -rn1 key
-				
-				if [[ $key == r ]]; then
-					echo -e "\n,: Running this command: \"$cmd\""
-					return 0
-				fi
-				
-				if [[ $key == s ]]; then
-					echo -e "\n,: Stopping the command."
-					return 1
-				fi
-				
-			done
-		fi
-	fi
-}
-
-#
-#  TODO: see todo at top. add rc of command, time of execution
-#cs_savecommand() {
-#	local cmd="$1"
-#	local histd="$cs_ROOTDIR/history/$(date +%Y/%m/%d/)"
-#	mkdir -p $histd
-#	
-#	#TODO: save return code? save partial commands?"
-#	echo "$(date +%Y%m%d%H%M%S)\t$(hostname)\t$cmd" >> $histd/$(hostname).txt
-#}
 
 #
 #
@@ -663,9 +611,15 @@ csfunc_hook_add_after() {
 # The hook functions are called like this:
 # <hook> <command timestamp> <command>
 csfunc_hook_iterate_before() {
+	local ret=0
+	
 	for i in "${!cs_HOOKS_BEFORE[@]}"; do
-		${cs_HOOKS_BEFORE[$i]} "$1" "$2"
+		if ! ${cs_HOOKS_BEFORE[$i]} "$1" "$2"; then
+			ret=1
+		fi
 	done
+	
+	return $ret
 }
 csfunc_hook_iterate_after() {
 	for i in "${!cs_HOOKS_AFTER[@]}"; do
@@ -742,18 +696,11 @@ csfunc_debug_trap() {
 		csfunc_catch_command=0
 		csfunc_lock
 		
-
 		# If we ctrlc this command, show the warning
 		cs_debug_trap_rc_ctrlc=0
 
-		
+		# Get last command from history without its number		
 		cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
-		
-		
-		# ShellCheck
-		if ! sc_check_wrapper "$cmd"; then
-			return 1
-		fi
 		
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
@@ -762,38 +709,39 @@ csfunc_debug_trap() {
 			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
 			
 			
-			csfunc_hook_iterate_before "$cs_timestamp" "$cmd"
+			# Any _before hook can prevent command execution
+			if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
 			
-			#-------------------------------------------------------------------
-			# This is where the commands are executed.
-			# First, we want to exetuce a "blank" command to set the $_ variable.
-			# Second, the actual command is executed.
-			# Third, we want to save both $_ and $? variables.
-			eval "
+				#-------------------------------------------------------------------
+				# This is where the commands are executed.
+				# First, we want to exetuce a "blank" command to set the $_ variable.
+				# Second, the actual command is executed.
+				# Third, we want to save both $_ and $? variables.
+				eval "
 
-csfunc_restore_internals $cs_rc $cs_last
+	csfunc_restore_internals $cs_rc $cs_last
 
-$cmd
+	$cmd
 
-cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
+	cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 
-			"
+				"
 			
-			cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
-			cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
+				cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
+				cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
 			
-			# FIXME: multiline commands?
-			echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
+				# FIXME: multiline commands?
+				echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
 			
-			csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
+				csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
 			
-			#-------------------------------------------------------------------		
+				#-------------------------------------------------------------------		
 		
-			# this could be a hook
-			if (( cs_rc > 0 )); then
-				echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
+				# this could be a hook
+				if (( cs_rc > 0 )); then
+					echo ",debug trap: return code warning: \$? == $cs_rc $(cs_explain_rc $cs_rc)"
+				fi
 			fi
-			
 		else
 			echo ",: commash prevented execution of: \"$cmd\""
 			echo ",: going to the debugger mode"
