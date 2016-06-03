@@ -565,7 +565,9 @@ csfunc_debug_trap() {
 	
 	#---------------------------------------------------------------------------
 	
-	
+	# We will get error from set -u if we do not assign default values here.
+	cs_rc=${cs_rc:-0}
+	cs_last=${cs_last:-''}
 	
 	#---------------------------------------------------------------------------
 	
@@ -603,11 +605,15 @@ csfunc_debug_trap() {
 				# Third, we want to save both $_ and $? variables.
 				eval "
 
+	set -u
+
 	csfunc_restore_internals $cs_rc $cs_last
 
 	$cmd
 
 	cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
+
+	set +u
 
 				"
 			

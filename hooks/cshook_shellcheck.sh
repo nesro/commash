@@ -19,7 +19,7 @@ cshook_shellcheck_before() {
 	#sc_out=$($sc_path <(echo '#!/bin/bash'; echo "$(set -o posix ; set)"; echo "$cmd") 2>&1)
 	
 	#TODO: create an external list of things to disable
-	sc_out=$($sc_path <(echo -e "#!/bin/bash\n# shellcheck disable=2043,2154\n$cmd") 2>&1)
+	sc_out=$($sc_path <(echo -e "#!/bin/bash\n# shellcheck disable=2043,2164,2154,2034\n$cmd") 2>&1)
 	sc_rc=$?
 	sc_out=$(echo "$sc_out" | tail -n +3)
 	
