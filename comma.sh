@@ -73,6 +73,17 @@ TODO:
 	- support more languages (english and czech)
 	
 	- todo: make an option to suppress/disable hooks/tips
+	
+	- add time in UTC. saving history while operating on servers around the
+		world would be easier
+	
+	- run safe/unsafe versions of commands by prepending , before them:
+		,rm <file>
+		
+	- safe version of rm should just move the file to .$origname.csrm
+	
+	- add a post-hook that inform you about the command end of execution.
+		via email, sound, change of title/screen title
 EOF
 fi
 
