@@ -84,6 +84,9 @@ TODO:
 	
 	- add a post-hook that inform you about the command end of execution.
 		via email, sound, change of title/screen title
+	
+	- save all terminal history with timestamps and return codes?
+		https://stackoverflow.com/questions/3173131/redirect-copy-of-stdout-to-log-file-from-within-bash-script-itself
 EOF
 fi
 
