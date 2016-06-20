@@ -611,7 +611,7 @@ csfunc_debug_trap() {
 			
 			# Any _before hook can prevent command execution
 			if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
-			
+
 				#-------------------------------------------------------------------
 				# This is where the commands are executed.
 				# First, we want to exetuce a "blank" command to set the $_ variable.
@@ -621,7 +621,7 @@ csfunc_debug_trap() {
 
 	set -u
 
-	csfunc_restore_internals $cs_rc $cs_last
+	csfunc_restore_internals $cs_rc \"$cs_last\"
 
 	$cmd
 
