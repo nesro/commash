@@ -1,6 +1,43 @@
 #!/bin/bash
 # https://github.com/nesro/commash
 
+#-------------------------------------------------------------------------------
+CSLOG=/tmp/cslog
+
+cs_ts() {
+	while IFS='' read -r line; do
+    		echo "$(date +%Y-%m-%d-%H-%M-%S-%N)|$1|$line" >> $CSLOG
+    		echo "$line"
+	done
+}
+
+
+#disabled atm
+if false && [[ -z $COMMASH_REDIRECT ]]; then
+	rm -f $CSLOG
+
+	# XXX: this doesn't work well (output is messed) if we prepend a command,
+	# f.ex: ts | tee -a ...
+	# find out why this happen and how to fix this
+	# an easy soulution would be write a program that mix up functionality of
+	# 'ts' and 'tee'
+	# another problem are the special characters in PS1. the logging program
+	# could filter these problematic characters
+	# the biggest problem atm is that program like 'less' and 'more' doesn't
+	# scroll as supposed
+	# there is also a problem with buffering.
+
+	exec > >(cs_ts "out")
+	exec > >(cs_ts "err" >&2)
+
+	COMMASH_REDIRECT=1 bash -il
+	exit $?
+else
+	echo "commash already redirected"
+fi
+
+#-------------------------------------------------------------------------------
+
 # poor man's multiline bash comment
 if false; then
 cat <<EOF
@@ -533,6 +570,13 @@ csfunc_restore_internals() {
 	return $1
 }
 
+cs_add_timestamp() {
+	while read -r line; do
+    		echo "$(date +%Y-%m-%d-%H-%M-%S-%N)|$1|$line" >> /tmp/.cslog
+    		echo "$line"
+	done
+}
+
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
 	
@@ -608,9 +652,10 @@ csfunc_debug_trap() {
 			# generate timestamp and use it as command identifier (for hooks)
 			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
 			
-			
 			# Any _before hook can prevent command execution
 			if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
+
+				echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> $CSLOG
 
 				#-------------------------------------------------------------------
 				# This is where the commands are executed.
@@ -630,12 +675,16 @@ csfunc_debug_trap() {
 	set +u
 
 				"
+		
+		#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
 			
 				cs_rc=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $2 }')
 				cs_last=$(echo $cs_bash_internals | awk -F "CSDELIMETER" '{ print $1 }')
 			
+				echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> $CSLOG
+			
 				# FIXME: multiline commands?
-				echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
+				#echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
 			
 				csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
 			fi
