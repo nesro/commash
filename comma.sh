@@ -26,6 +26,10 @@ if false && [[ -z $COMMASH_REDIRECT ]]; then
 	# the biggest problem atm is that program like 'less' and 'more' doesn't
 	# scroll as supposed
 	# there is also a problem with buffering.
+	
+	# the best solution is to write our version of the "script" program
+	# or just use the standard version and write our timestamps to the output
+	# file
 
 	exec > >(cs_ts "out")
 	exec > >(cs_ts "err" >&2)
