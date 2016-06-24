@@ -11,10 +11,8 @@ cs_ts() {
 	done
 }
 
-
-#disabled atm
-if false && [[ -z $COMMASH_REDIRECT ]]; then
-	rm -f $CSLOG
+if [[ -z $COMMASH_REDIRECT ]]; then
+	#rm -f $CSLOG
 
 	# XXX: this doesn't work well (output is messed) if we prepend a command,
 	# f.ex: ts | tee -a ...
@@ -31,10 +29,11 @@ if false && [[ -z $COMMASH_REDIRECT ]]; then
 	# or just use the standard version and write our timestamps to the output
 	# file
 
-	exec > >(cs_ts "out")
-	exec > >(cs_ts "err" >&2)
+	#exec > >(cs_ts "out")
+	#exec > >(cs_ts "err" >&2)
 
-	COMMASH_REDIRECT=1 bash -il
+	# script capture all keyboard activity including deleting characters
+	script -q -c "COMMASH_REDIRECT=1 bash -il" -a $CSLOG
 	exit $?
 else
 	echo "commash already redirected"
@@ -667,6 +666,10 @@ csfunc_debug_trap() {
 				# Second, the actual command is executed.
 				# Third, we want to save both $_ and $? variables.
 				eval "
+
+	if [[ -n \$COMP_LINE ]]; then
+		echo \"COMP_LINE is empty\"
+	fi
 
 	set -u
 
