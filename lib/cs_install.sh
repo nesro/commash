@@ -20,9 +20,14 @@ cs_install_commash() {
 		exit 1
 	fi
 	
-	if [[ ! -x $sc_path ]]; then
+	#TODO: include some general shellcheck file that have the path as a variable
+	if [[ ! -x ~/.cabal/bin/shellcheck ]]; then
 		cat <<EOF
-Please install shellcheck into: $sc_path
+It seems you don't have shellcheck. You need that in this version.
+Rerun this script after you have it.
+
+Please install shellcheck into: ~/.cabal/bin/shellcheck
+
 You can do it on Ubuntu like this:
 sudo add-apt-repository universe
 sudo apt-get install cabal-install
