@@ -11,6 +11,7 @@ cs_ts() {
 	done
 }
 
+if false; then
 if [[ -z $COMMASH_REDIRECT ]]; then
 	#rm -f $CSLOG
 
@@ -37,6 +38,7 @@ if [[ -z $COMMASH_REDIRECT ]]; then
 	exit $?
 else
 	echo "commash already redirected"
+fi
 fi
 
 #-------------------------------------------------------------------------------
