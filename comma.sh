@@ -632,6 +632,7 @@ csfunc_debug_trap() {
 	# We will get error from set -u if we do not assign default values here.
 	cs_rc=${cs_rc:-0}
 	cs_last=${cs_last:-''}
+	COMP_LINE=${COMP_LINE:-''}
 	
 	#---------------------------------------------------------------------------
 	
