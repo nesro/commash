@@ -1,0 +1,7 @@
+# You can check the wiki here:
+# https://github.com/koalaman/shellcheck/wiki/SC####
+# Where #### is the code of the case:
+2043 # "This loop will only run once, with var=value"
+2164 # "Use cd ... || exit in case cd fails."
+2154 # "var is referenced but not assigned."
+2034 # "foo appears unused. Verify it or export it."
