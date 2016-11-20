@@ -512,6 +512,7 @@ csfunc_prompt() {
 #-------------------------------------------------------------------------------
 csfunc_debug_trap_enable() {
 	PROMPT_COMMAND_BACKUP="$PROMPT_COMMAND"
+	PROMPT_COMMAND=${PROMPT_COMMAND:-:}
 	PROMPT_COMMAND="csfunc_preprompt;$PROMPT_COMMAND;csfunc_prompt"
 	trap 'csfunc_debug_trap' DEBUG
 	shopt -s extdebug
