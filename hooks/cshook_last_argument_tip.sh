@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# XXX: I don't know if this entire hook is a good idea. It can cause more
+# problems than benefits.
+# If it should work good, it must fire just in the right situations.
+
 # TODO: parse all arguments, not just the last
 
 cshook_last_argument_tip_before() {
@@ -20,6 +24,6 @@ cshook_last_argument_tip_after() {
 	fi
 }
 
-csfunc_hook_add_before 'cshook_last_argument_tip_before'
-csfunc_hook_add_after 'cshook_last_argument_tip_after'
+#csfunc_hook_add_before 'cshook_last_argument_tip_before'
+#csfunc_hook_add_after 'cshook_last_argument_tip_after'
 
