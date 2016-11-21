@@ -5,7 +5,7 @@ sc_check=1 # check every command with ShellCheck before executing
 sc_path=~/.cabal/bin/shellcheck
 sc_debug=0
 
-cssc_disable_list_file="/home/n/.commash/hooks/cshook_shellcheck_disable_list.txt"
+cssc_disable_list_file="$cs_ROOTDIR/hooks/cshook_shellcheck_disable_list.txt"
 cssc_disable=""
 
 cssc_load_disable_list() {
