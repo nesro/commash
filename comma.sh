@@ -632,7 +632,15 @@ csfunc_debug_trap() {
 	# We will get error from set -u if we do not assign default values here.
 	cs_rc=${cs_rc:-0}
 	cs_last=${cs_last:-''}
+
+	# These are some env variables that makes troubles too. Posible TODO:
+	# is to set them all, and add a custom list of course. + TODO: make
+	# the -u option optional
+	# another approach I can imagine is to  hold a list of variables that
+	# were set and set them again before every command so shellcheck
+	# knows about them
 	COMP_LINE=${COMP_LINE:-''}
+	OLDPWD=${OLDPWD:-''}
 
 	#---------------------------------------------------------------------------
 
