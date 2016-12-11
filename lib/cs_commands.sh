@@ -178,18 +178,43 @@ alias ,selftest="csfunc_shellcheck_selftest"
 #}
 
 commash_main() {
-
 	csfunc_lib_hooks_load
+
 	#csfunc_lib_debugger_load
 
 
 	cs_run_install_if_needed
-	#csfunc_hook_init
+
 	csfunc_debug_trap_enable
 
 	csfunc_welcome
-	set +e
 }
+
+
+commash_unload() {
+	# this function also recover PROMPT_COMMAND and PS1 from backup
+	csfunc_debug_trap_disable
+
+	for f in $(declare -F | grep csfunc | awk '{ print $3 }'); do
+		unset -f $f
+	done
+
+	for v in $((set -o posix; set) | grep ^cs_ | awk -F= '{ print  $1 }'); do
+		unset $v
+	done
+}
+
+csfunc_reload() {
+	# we need to store the path to the file we want to source again
+	# because commash_unload will unload this information
+	reload_comma_sh_path="$cs_COMMA_SH"
+	commash_unload
+
+	# shellcheck source=/dev/null
+	source "$reload_comma_sh_path"
+}
+alias ,reload="csfunc_reload"
+alias ,r="csfunc_reload"
 
 #-------------------------------------------------------------------------------
 

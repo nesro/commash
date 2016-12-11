@@ -50,7 +50,7 @@ cs_RC_HOOK_GREP="if \[\[ -f $cs_COMMA_SH \]\]\; then source $cs_COMMA_SH\; fi"
 cs_RC_HOOK_SED=$(echo "$cs_RC_HOOK_GREP" | escape_sed)
 cs_LOGOUT_HOOK="cs_LOGOUT=1"
 
-cs_LOCKFILE=$cs_ROOTDIR/lock.commash
+cs_LOCKFILE=/var/lock/commash
 cs_LOGFILE=$cs_ROOTDIR/log.commash
 
 cs_ERROR=0

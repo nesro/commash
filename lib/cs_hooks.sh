@@ -16,11 +16,13 @@
 
 
 #-------------------------------------------------------------------------------
-
+# locking
+# TODO: add $$ to the lockfile for multple instances of bash running
+# XXX is locking mandatory?
 
 # XXX: make a different approach for SSD and/or RO mounted filesystem
 csfunc_locked() {
-	if [[ -f ~/.commash/lock ]]; then
+	if [[ -f $cs_LOCKFILE ]]; then
 		return 0 # true, not locked
 	else
 		return 1
@@ -34,6 +36,7 @@ csfunc_lock() {
 csfunc_unlock() {
 	$RM -f $cs_LOCKFILE
 }
+
 
 #-------------------------------------------------------------------------------
 # These functions are executed with every prompt. They are two because we
@@ -58,7 +61,8 @@ csfunc_prompt() {
 		cs_ENABLED=1
 	fi
 
-	csfunc_unlock
+	# XXX: lock
+	#csfunc_unlock
 
 
 	if [[ $cs_DEBUGGER == 1 ]]; then
@@ -93,14 +97,18 @@ csfunc_debug_trap_enable() {
 
 	trap 'csfunc_debug_trap' DEBUG
 	shopt -s extdebug
-	$RM -f $cs_LOCKFILE
+
+	# XXX lock
+	#$RM -f $cs_LOCKFILE
 }
 csfunc_debug_trap_disable() {
 	PROMPT_COMMAND="$PROMPT_COMMAND_BACKUP"
 	PS1="$cs_PS1_BACKUP"
 	trap - DEBUG
 	shopt -u extdebug
-	$RM -f $cs_LOCKFILE
+
+	# XXX lock
+	#$RM -f $cs_LOCKFILE
 }
 
 #-------------------------------------------------------------------------------
@@ -163,7 +171,9 @@ csfunc_debug_trap() {
 		if type csfunc_rc >/dev/null 2>&1; then
 			csfunc_rc $cs_debug_trap_rc
 		fi
-		csfunc_unlock
+
+		# XXX lock
+		# csfunc_unlock
 		csfunc_inside=0
 		return 1
 	fi
@@ -218,10 +228,13 @@ csfunc_debug_trap() {
 
 	#---------------------------------------------------------------------------
 
-
-	if (( csfunc_catch_command == 1 )) && [[ ! -f ~/.commash/lock ]]; then
+	# XXX lock
+	#if (( csfunc_catch_command == 1 )) && [[ ! -f $cs_LOCKFILE ]]; then
+	if (( csfunc_catch_command == 1 )); then
 		csfunc_catch_command=0
-		csfunc_lock
+
+		# XXX lock
+		#csfunc_lock
 
 		# If we ctrlc this command, show the warning
 		cs_debug_trap_rc_ctrlc=0
