@@ -2,6 +2,11 @@
 
 # Commash debugger library
 
+
+#-------------------------------------------------------------------------------
+# script debugging - mainly for internal testing. subject for moving this
+# to another file
+
 csfunc_inside_debugger() {
 	cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
 

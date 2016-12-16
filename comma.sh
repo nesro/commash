@@ -1,6 +1,8 @@
 #!/bin/bash
 # https://github.com/nesro/commash
 
+set +x
+
 #-------------------------------------------------------------------------------
 
 # TODO: add some nice text since this is the first file people will open
@@ -26,6 +28,15 @@ for f in ~/.commash/lib/cs_*.sh; do
 	source "$f"
 done
 
+#-------------------------------------------------------------------------------
+
+if [[ -n "$CS_XTRACE" ]]; then
+	set -x
+fi
+
+#-------------------------------------------------------------------------------
+
 commash_main || >&2 echo -e "\n!!! commash is broken :( \
 TODO: auto unload things, navigate user how to safely uninstall?\n"
+
 

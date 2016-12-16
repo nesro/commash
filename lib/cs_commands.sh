@@ -219,5 +219,23 @@ alias ,r="csfunc_reload"
 #-------------------------------------------------------------------------------
 
 
+csfunc_xtrace_on() {
+	CS_XTRACE=1
+	echo ",: Turning debugging on! If you want to debug commash initialization \
+reload commash with the command: ,r"
+	set -x
+}
+alias ,xon="csfunc_xtrace_on"
+
+csfunc_xtrace_off() {
+	set +x
+	CS_XTRACE=
+}
+alias ,xoff="csfunc_xtrace_off"
+
+#-------------------------------------------------------------------------------
+
+
+
 
 
