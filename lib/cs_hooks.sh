@@ -2,18 +2,30 @@
 
 # Commash hook library
 
-
-
-
-
 #-------------------------------------------------------------------------------
 # commash debug trap and prompt_command wrappers
 #-------------------------------------------------------------------------------
 
 
 
+# TODO: seems that bash44 solution is working. automate is here
+CS_BASH_VERSION=
+csfunc_bash_version() {
 
-
+	case $BASH_VERSION in
+	4.4*)
+		echo "You have BASH 4.4. Nice!"
+		CS_BASH_VERSION=44
+		;;
+	4.3*)
+		echo "You have BASH 4.3. That's ok, but you're old. :P"
+		CS_BASH_VERSION=43
+		;;
+	*)
+		echo "either you're not using bash, or you use some really old version"
+		;;
+	esac
+}
 
 #-------------------------------------------------------------------------------
 # locking
