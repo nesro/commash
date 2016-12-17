@@ -179,13 +179,23 @@ alias ,selftest="csfunc_shellcheck_selftest"
 
 commash_main() {
 	csfunc_lib_hooks_load
-
 	#csfunc_lib_debugger_load
-
-
 	cs_run_install_if_needed
 
-	csfunc_debug_trap_enable
+	case $BASH_VERSION in
+	4.4*)
+		echo "You have BASH 4.4. Nice!"
+		echo "XXX: the trick with PS0 is not working ;~;"
+		csfunc_debug_trap_enable44
+		;;
+	4.3*)
+		echo "You have BASH 4.3. That's ok, but you're old. :P"
+		csfunc_debug_trap_enable
+		;;
+	*)
+		echo "either you're not using bash, or you use some really old version"
+		;;
+	esac
 
 	csfunc_welcome
 }

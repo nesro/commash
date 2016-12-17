@@ -3,6 +3,13 @@
 # I'll test it sideways before putting it into ,sh
 # http://stromberg.dnsalias.org/~strombrg/PS0-prompt/
 
+
+# XXX XXX XXX
+# There is a major problem with this approach. If we run the "main code"
+# from: PS0='$(csfunc_ps0)\n'
+# all happens in a subshell and we cannot easily modify global variables
+# like _ and ?
+
 #-------------------------------------------------------------------------------
 
 CS_BASH_VERSION=
@@ -26,13 +33,17 @@ csfunc_bash_version() {
 
 # XXX this will work only for bash 4.4+
 
+ps0cnt=0
+
 # and here we're gonna run our commands!
 csfunc_ps0() {
 	csfunc_inside=1
 
 	cmd="$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")"
 
-	>&2 echo ",: cmd=\"$cmd\""
+	ps0cnt=$(( ps0cnt + 1 ))
+
+	>&2 echo ",: cmd=\"$cmd\" ps0cnt=$ps0cnt"
 
 	eval "$cmd"
 
