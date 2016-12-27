@@ -10,13 +10,24 @@
 set +x
 
 cs_ps4() {
-	retcode=$?
+	local retcode=$?
+	local fromfile="$1"
+	local fromfunction="$2"
+
+# I tried some magic with deleting output of xtrace but it failed for the output
+# over multiple lines. I'm not going to waste my time anymore for now.
+#echo -en "$(tput cuu1)\r"
+
 	# The \r character is important here. It seems that bash print some
 	# mess before printing PS4 so we need to get rid of this.
 	echo -en "\r\e[31mDEBUG: \e[0m"
-	printf "[%s][%40s]" $retcode $1
+	printf "[%s][%20s]" $retcode ${fromfunction:0:20}
 	for (( i=0; i < ${#FUNCNAME[@]} ; i++ )); do echo -n "|---"; done
+	echo -n ": "
 }
 
-export PS4='$(cs_ps4 "${BASH_SOURCE##*/}:${FUNCNAME[0]}:${LINENO}")'
+# LINENO is not working as intended because we run pretty much everything
+# from DEBUG trap.
+#export PS4='$(cs_ps4 "${BASH_SOURCE##*/}:${FUNCNAME[0]}:${LINENO}:${BASH_LINENO[*]}")'
+export PS4='$(cs_ps4 "${BASH_SOURCE##*/}" "${FUNCNAME[0]}")'
 

@@ -113,7 +113,11 @@ csfunc_debug_trap_enable() {
 	cs_PS1_BACKUP="$PS1"
 	PS1="$(csfunc_ps1)$PS1"
 
-	trap 'csfunc_debug_trap' DEBUG
+	trap 'csfunc_debug_trap $LINENO' DEBUG
+
+	# is there any scenaio we need this?
+	#set -o functrace
+
 	shopt -s extdebug
 
 	# XXX lock
@@ -218,6 +222,12 @@ cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
 
+	# This seems to be a lineno of the shell like it is a script.
+	# We mayme could(?) add another layer of protection against running a command
+	# multiple times (i.e. the bug with scrot).
+	cs_last_lineno=$cs_lineno
+	cs_lineno=$1
+
 	#---------------------------------------------------------------------------
 
 	# If we control-c a command, we jump again into the debug trap
@@ -233,7 +243,6 @@ csfunc_debug_trap() {
 		csfunc_inside=0
 		return 1
 	fi
-
 
 	#---------------------------------------------------------------------------
 	# These are cases where we execute the command.
@@ -260,6 +269,20 @@ csfunc_debug_trap() {
 	if [[ -n $COMP_LINE ]]; then
 		return 0
 	fi
+
+	if [[ $BASH_COMMAND == ":" ]]; then
+		return 0
+	fi
+
+	# XXX
+	if (( cs_last_lineno == cs_lineno )); then
+		>&2 echo "XXX cs_last_lineno == cs_lineno == $cs_last_lineno == $cs_lineno"
+		return 1
+	fi
+
+	#---------------------------------------------------------------------------
+
+	# >&2 printf "DEBUGTRAP [line: %s] command: \"%s\"\n" "$1" "$BASH_COMMAND"
 
 	#---------------------------------------------------------------------------
 
