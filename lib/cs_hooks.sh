@@ -274,9 +274,11 @@ csfunc_debug_trap() {
 		return 0
 	fi
 
-	# XXX
+	# this also catches commands like:
+	# echo a; echo b
+	# which we want to execute in one run
 	if (( cs_last_lineno == cs_lineno )); then
-		>&2 echo "XXX cs_last_lineno == cs_lineno == $cs_last_lineno == $cs_lineno"
+		>&2 echo "XXX cs_last_lineno == cs_lineno == $cs_last_lineno == $cs_lineno, BASH_COMMAND=$BASH_COMMAND"
 		return 1
 	fi
 
