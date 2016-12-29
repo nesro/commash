@@ -10,6 +10,11 @@ set +x
 
 #-------------------------------------------------------------------------------
 
+cs_VERSION=0.0.0
+cs_VERSION_LONG="Commash - version $cs_VERSION"
+
+#-------------------------------------------------------------------------------
+
 if [[ -n "$cs_SOURCED" ]]; then
 	>&2 echo -e "\n!!! commash has been already sourced."
 	return 1
