@@ -43,7 +43,9 @@ cshook_shellcheck_before() {
 	#sc_out=$($sc_path <(echo '#!/bin/bash'; echo "$(set -o posix ; set)"; echo "$cmd") 2>&1)
 
 	if [[ -z "$cssc_disable" ]]; then
+		csfunc_dbg_echo ", cssc: loading disable list begin"
 		cssc_disable=$(cssc_load_disable_list)
+		csfunc_dbg_echo ", cssc: loading disable list end"
 	fi
 
 	sc_out=$($sc_path <(echo -e "#!/bin/bash\n# shellcheck disable=$cssc_disable\n$cmd") 2>&1)

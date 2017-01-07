@@ -83,10 +83,6 @@ alias ,ns=",nsafe"
 
 #-------------------------------------------------------------------------------
 
-
-
-
-
 # This will be used in the debug trap
 # TODO: maybe turn off the debug trap at all?
 cs_enable() {
@@ -138,8 +134,6 @@ alias ,="cs"
 alias ,e=", e"
 alias ,d=", d"
 
-
-
 csfunc_debug() {
 	csfunc_inside=1
 
@@ -171,65 +165,15 @@ csfunc_shellcheck_selftest() {
 }
 alias ,selftest="csfunc_shellcheck_selftest"
 
-
 #-------------------------------------------------------------------------------
 
 #csfunc_load_lib() {
 #}
 
-commash_main() {
-	csfunc_lib_hooks_load
-	#csfunc_lib_debugger_load
-	cs_run_install_if_needed
-
-	case $BASH_VERSION in
-	4.4*)
-		echo "You have BASH 4.4. Nice!"
-		echo "XXX: the trick with PS0 is not working ;~;"
-		csfunc_debug_trap_enable44
-		;;
-	4.3*)
-		echo "You have BASH 4.3. That's ok, but you're old. :P"
-		csfunc_debug_trap_enable
-		;;
-	*)
-		echo "either you're not using bash, or you use some really old version"
-		;;
-	esac
-
-	csfunc_welcome
-}
-
-
-commash_unload() {
-	# this function also recover PROMPT_COMMAND and PS1 from backup
-	csfunc_debug_trap_disable
-
-	for f in $(declare -F | grep csfunc | awk '{ print $3 }'); do
-		unset -f $f
-	done
-
-	for v in $((set -o posix; set) | grep ^cs_ | awk -F= '{ print  $1 }'); do
-		unset $v
-	done
-}
-
-csfunc_reload() {
-	# we need to store the path to the file we want to source again
-	# because commash_unload will unload this information
-	reload_comma_sh_path="$cs_COMMA_SH"
-	commash_unload
-
-	# shellcheck source=/dev/null
-	source "$reload_comma_sh_path"
-}
-alias ,reload="csfunc_reload"
-alias ,r="csfunc_reload"
-
 #-------------------------------------------------------------------------------
 
 csfunc_xtrace_on() {
-	CS_XTRACE=1
+	cs_XTRACE=1
 	echo ",: Turning debugging on! If you want to debug commash initialization \
 reload commash with the command: ,r"
 	set -x
@@ -237,14 +181,9 @@ reload commash with the command: ,r"
 alias ,xon="csfunc_xtrace_on"
 
 csfunc_xtrace_off() {
-	set +x
-	CS_XTRACE=
+	{ set +x; } 2>/dev/null
+	cs_XTRACE=
 }
 alias ,xoff="csfunc_xtrace_off"
 
 #-------------------------------------------------------------------------------
-
-
-
-
-

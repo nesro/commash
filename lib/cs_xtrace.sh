@@ -7,9 +7,16 @@
 # This works well and I can do some other things finally.
 # XXX: well actually, there is a weird bug with negative line numbers.
 
-set +x
+csfunc_dbg_echo() {
+	# just save 2 lines in debug output
+	{ set +x; } 2>/dev/null
+	if [[ -n "$cs_XTRACE" ]]; then
+		>&2 echo ",DBG: $1"
+		set -x
+	fi
+}
 
-cs_ps4() {
+csfunc_ps4() {
 	local retcode=$?
 	local fromfile="$1"
 	local fromfunction="$2"
@@ -20,14 +27,19 @@ cs_ps4() {
 
 	# The \r character is important here. It seems that bash print some
 	# mess before printing PS4 so we need to get rid of this.
-	echo -en "\r\e[31mDEBUG: \e[0m"
-	printf "[%s][%20s]" $retcode ${fromfunction:0:20}
-	for (( i=0; i < ${#FUNCNAME[@]} ; i++ )); do echo -n "|---"; done
-	echo -n ": "
+	>&2 echo -en "\r\e[31mDEBUG: \e[0m"
+
+	>&2 printf "[%s][%20s]" $retcode ${fromfunction:0:20}
+	for (( i=0; i < ${#FUNCNAME[@]} ; i++ )); do
+			>&2 echo -n "|---";
+	done
+	>&2 echo -n ": "
+
+	# >&2 echo -n "(BC $BASH_COMMAND) "
+	# >&2 printf '(FN %s) ' "${FUNCNAME[@]}"
 }
 
 # LINENO is not working as intended because we run pretty much everything
 # from DEBUG trap.
 #export PS4='$(cs_ps4 "${BASH_SOURCE##*/}:${FUNCNAME[0]}:${LINENO}:${BASH_LINENO[*]}")'
-export PS4='$(cs_ps4 "${BASH_SOURCE##*/}" "${FUNCNAME[0]}")'
-
+export PS4='$(csfunc_ps4 "${BASH_SOURCE##*/}" "${FUNCNAME[0]}")'

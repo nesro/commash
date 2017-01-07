@@ -20,7 +20,6 @@ cs_DEBUG=${cs_DEBUG:-0}
 # - show internals of eval, so you can see what is really executing
 cs_INTERNAL_DEBUG=${cs_INTERNAL_DEBUG:-"none"}
 
-
 #-------------------------------------------------------------------------------
 # Common functions
 
@@ -59,4 +58,3 @@ cs_ENABLED=0
 cs_DEBUGGER=0
 
 [[ $cs_INTERNAL_DEBUG =~ globvars|all ]] && set +xv
-

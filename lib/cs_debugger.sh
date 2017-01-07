@@ -54,7 +54,6 @@ csfunc_inside_debugger() {
 	done
 }
 
-
 csfunc_lib_debugger_load() {
 	:
 }
@@ -62,5 +61,3 @@ csfunc_lib_debugger_load() {
 csfunc_lib_debugger_unload() {
 	:
 }
-
-

@@ -1,6 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # https://github.com/nesro/commash
-# safe version of rm
 
 # TODO: don't rm, only move it into trash
 

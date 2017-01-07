@@ -74,3 +74,31 @@ main() {
 
 main
 
+# trash from main  source that don't work how I want
+if false; then
+
+	# BASH 4.4 pre-post cmd
+	csfunc_ps0() {
+		csfunc_inside=1
+		trap '' DEBUG
+		#>&2 echo "[PS0]"
+
+		csfunc_run_user_cmd
+
+		trap 'csfunc_debug_trap44' DEBUG
+		csfunc_inside=0
+	}
+	PS0='$(csfunc_ps0)\n'
+	csfunc_debug_trap44() {
+		#>&2 echo "BASH_COMMAND=\"$BASH_COMMAND\" csfunc_inside=\"$csfunc_inside\""
+		if [[ $BASH_COMMAND =~ ^csfunc_ ]] || [[ $csfunc_inside == 1 ]]; then
+			return 0
+		fi
+		return 1
+	}
+	csfunc_debug_trap_enable44() {
+		shopt -s extdebug
+		trap 'csfunc_debug_trap44' DEBUG
+	}
+
+fi

@@ -88,5 +88,7 @@ TODO:
 
 
 	- check "sudo bash" (?? add check: if [ -O "$HOME" ] for situations when user run bash with sudo and root doesn't have home?)
+
+	- explain this magical code (it just ends the bash): set -T;trap : DEBUG;:&&:&
 EOF
 fi
