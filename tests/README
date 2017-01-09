@@ -1,3 +1,4 @@
+
 # TODO: add tests. I don't think we can do it in a nice way.
 # my bet is that we will need to use expect ( http://expect.sourceforge.net/ )
 # or something similar
@@ -31,4 +32,3 @@ rm a | rm b | rm c
 # show rc
 - show rc after ctrl+c
 - show rc other than 0 after every executed command (even from debugger)
-

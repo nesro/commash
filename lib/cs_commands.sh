@@ -165,6 +165,12 @@ csfunc_shellcheck_selftest() {
 }
 alias ,selftest="csfunc_shellcheck_selftest"
 
+csfunc_expect_test() {
+	echo ",: running expect tests from: $cs_ROOTDIR/tests/run.sh"
+	$cs_ROOTDIR/tests/run.sh
+}
+alias ,expect="csfunc_expect_test"
+
 #-------------------------------------------------------------------------------
 
 #csfunc_load_lib() {

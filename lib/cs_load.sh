@@ -32,11 +32,18 @@ csfunc_unload() {
 	# we have to remove csfunc_ps4 from PS4, because we will unset this function
 	PS4="$cs_PS4_BACKUP"
 
-	for f in $(declare -F | grep csfunc | awk '{ print $3 }'); do
+	# unload aliases
+	for a in $(alias | grep ",.*" | awk '{ print $2 }' | awk -F= '{ print $1 }'); do
+		unalias "$a"
+	done
+
+	# unload functions
+	for f in $(declare -F | grep csfunc_ | awk '{ print $3 }'); do
 		unset -f $f
 	done
 
-	for v in $((set -o posix; set) | grep ^cs_ | awk -F= '{ print  $1 }'); do
+	# unload variables
+	for v in $( (set -o posix; set) | grep ^cs_ | awk -F= '{ print $1 }'); do
 		unset $v
 	done
 }
