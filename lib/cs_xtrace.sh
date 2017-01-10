@@ -9,7 +9,7 @@
 
 csfunc_dbg_echo() {
 	# just save 2 lines in debug output
-	{ set +x; } 2>/dev/null
+	# { set +x; } 2>/dev/null # what if xtrace is on but cs_XTRACE is not?
 	if [[ -n "$cs_XTRACE" ]]; then
 		>&2 echo ",DBG: $1"
 		set -x

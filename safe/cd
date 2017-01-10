@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
 
-# get more info:
-# help cd
-
-csfunc_cd()  {
-    >&2 echo "commash CD to $1"
-    cd $1
-}
+# TODO: delete this file or move the function csfunc_cd here

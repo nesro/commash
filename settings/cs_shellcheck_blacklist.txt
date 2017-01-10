@@ -1,4 +1,4 @@
-# You can check the wiki here:
+# You can check the wiki entry for each case here:
 # https://github.com/koalaman/shellcheck/wiki/SC####
 # Where #### is the code of the case:
 2043 # "This loop will only run once, with var=value"

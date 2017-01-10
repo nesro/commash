@@ -3,8 +3,10 @@
 csfunc_main() {
 	csfunc_lib_hooks_load
 	csfunc_lib_safe_load
+	csfunc_lib_tips_load
 	#csfunc_lib_debugger_load
 	csfunc_run_install_if_needed
+
 
 	case $BASH_VERSION in
 	4.4*)
@@ -44,6 +46,12 @@ csfunc_unload() {
 
 	# unload variables
 	for v in $( (set -o posix; set) | grep ^cs_ | awk -F= '{ print $1 }'); do
+
+		# and I wondered why this variable doesn't survive reload :))
+		if [[ $v == cs_XTRACE ]]; then
+			continue
+		fi
+
 		unset $v
 	done
 }
@@ -51,14 +59,11 @@ csfunc_unload() {
 csfunc_reload() {
 	# things we need to save before uloading
 	local reload_comma_sh_path="$cs_COMMA_SH"
-	local reload_cs_XTRACE="$cs_XTRACE"
 
 	csfunc_unload
 
-	cs_XTRACE="$reaload_cs_XTRACE"
-
 	# shellcheck source=/dev/null
-	source "$reload_comma_sh_path"
+	cs_XTRACE=$cs_XTRACE source "$reload_comma_sh_path"
 }
 alias ,reload="csfunc_reload"
 alias ,r="csfunc_reload"

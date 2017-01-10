@@ -5,27 +5,17 @@ sc_check=1 # check every command with ShellCheck before executing
 sc_path=~/.cabal/bin/shellcheck
 sc_debug=0
 
-cssc_disable_list_file="$cs_ROOTDIR/hooks/cshook_shellcheck_disable_list.txt"
+cssc_disable_list_file="$cs_ROOTDIR/settings/cs_shellcheck_blacklist.txt"
 cssc_disable=""
 
 cssc_load_disable_list() {
+	# TODO: this has been refactored, so it can be improved now
 	if [[ ! -f $cssc_disable_list_file ]]; then
 		>&2 echo ",: ShellCheck: disable list file \"$cssc_disable_list_file\" not found"
 		return
 	fi
 
-	cssc_disable=""
-	while IFS='' read -r line || [[ -n "$line" ]]; do
-		line=$(echo "$line" | awk -F'#' '{ print $1 }' | tr -d ' ')
-		if [[ -z "$line" ]]; then
-			continue
-		fi
-		if [[ -z "$cssc_disable" ]]; then
-			cssc_disable="$line"
-		else
-			cssc_disable="$cssc_disable,$line"
-		fi
-	done < "$cssc_disable_list_file"
+	csfunc_load_settings $cssc_disable_list_file cssc_disable ,
 
 	echo -n "$cssc_disable"
 }

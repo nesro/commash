@@ -1,0 +1,5 @@
+# blacklist of tips.
+# one tip name per line
+# if you want to search for the tip, search for:
+# "csfunc_tip XXXX" where XXXX is the tip name
+testtip # ignore the testing tip

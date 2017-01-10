@@ -29,19 +29,39 @@ csfunc_lib_safe_unload() {
 # bash builtins - they are not stored in a file
 # we can override their names with aliases
 
+# builtins: source, alias, bg, bind, break, builtin, caller, cd, command,
+# compgen, complete, compopt, continue, declare, typeset, dirs, disown, echo,
+# enable, eval, exec, exit, export, fc, fg, getopts, hash, help, history, jobs,
+# kill, let, local, mapfile, readarray, popd, printf, pushd, pwd, read,
+# readonly, return, set, shift, shopt, suspend, test, times, trap, type, ulimit,
+# umask, unalias, unset, wait
+
 # TODO: check if the user is doing: cd -, cd $_
 csfunc_cd()  {
 		if (( $# == 0 )); then
 				echo ",: cd to ~, which is $HOME"
-				cd
+				builtin cd
 				return
+		fi
+
+		if (( $# == 1 )) && [[ "$1" == $HOME ]]; then
+			csfunc_tip cdhome "You don't need to specify your home directory. Just " \
+				"run cd without arguments."
+			builtin cd
+			return
+		fi
+
+		if (( $# == 1 )) && [[ "$1" == "-" ]]; then
+			csfunc_tip cddash "todo: print OLD/PWD"
+			builtin cd -
+			return
 		fi
 
 		if (( $# > 1 )); then
 			echo ",: cd was run with more than argument. this extended " \
 			"functionality is not supported yet. so we will just execute your command"
 			echo ", executing: cd $@"
-			cd "$@"
+			builtin cd "$@"
 			return
 		fi
 

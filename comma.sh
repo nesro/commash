@@ -7,7 +7,12 @@ if [[ -n "$cs_DISABLED" ]]; then
 	return 0
 fi
 
-set +x
+if [[ -n "$cs_XTRACE" ]]; then
+	set -x
+else
+	echo "NO DEBUGGING"
+	set +x
+fi
 
 #-------------------------------------------------------------------------------
 
