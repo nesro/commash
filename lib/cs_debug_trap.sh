@@ -48,7 +48,7 @@ csfunc_prompt() {
 # a command. It's second argument, which will not be used will be treated
 # as the $_ variable.
 csfunc_restore_internals() {
-	return $1
+	return "$1"
 }
 
 #-------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ csfunc_debug_trap() {
 			# Any _before hook can prevent command execution
 			if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
 
-				echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> $CSLOG
+				echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> "$CSLOG"
 
 				#-------------------------------------------------------------------
 				# This is where the commands are executed.
@@ -214,7 +214,7 @@ csfunc_debug_trap() {
 				cs_rc=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $2 }')
 				cs_last=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $1 }')
 
-				echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> $CSLOG
+				echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> "$CSLOG"
 
 				# FIXME: multiline commands?
 				#echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE

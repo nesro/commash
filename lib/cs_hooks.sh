@@ -67,7 +67,7 @@ csfunc_lib_hooks_load() {
 	cspc_command_cnt=0
 
 	for hookfile in $cs_HOOKS_DIR/cshook_*.sh; do
-		source $hookfile
+		source "$hookfile"
 	done
 
 }

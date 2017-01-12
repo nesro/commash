@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# https://github.com/nesro/commash
-
-# TODO: don't rm, only move it into trash
-
-for f in "$@"; do
-	echo ",safe rm: \"$f\""
-done
-

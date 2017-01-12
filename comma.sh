@@ -3,14 +3,15 @@
 
 # if you want to disable commash for a new bash instance:
 # env cs_DISABLED=1 bash
-if [[ -n "$cs_DISABLED" ]]; then
+cs_DISABLED=${cs_DISABLED:-}
+if [[ -n "${cs_DISABLED}" ]]; then
+	>&2 echo ",: commash is disabled"
 	return 0
 fi
 
 if [[ -n "$cs_XTRACE" ]]; then
 	set -x
 else
-	echo "NO DEBUGGING"
 	set +x
 fi
 
@@ -31,20 +32,24 @@ fi
 #-------------------------------------------------------------------------------
 
 cs_VERSION=0.0.0
+# shellcheck disable=SC2034
 cs_VERSION_LONG="Commash - version $cs_VERSION"
 
 #-------------------------------------------------------------------------------
 
 for f in ~/.commash/lib/cs_*.sh; do
 	# shellcheck source=/home/n/.commash/lib/cs_commands.sh
-	# shellcheck source=/home/n/.commash/lib/cs_debugger.sh
 	# shellcheck source=/home/n/.commash/lib/cs_debug_trap.sh
+	# shellcheck source=/home/n/.commash/lib/cs_debugger.sh
 	# shellcheck source=/home/n/.commash/lib/cs_history.sh
 	# shellcheck source=/home/n/.commash/lib/cs_hooks.sh
 	# shellcheck source=/home/n/.commash/lib/cs_install.sh
 	# shellcheck source=/home/n/.commash/lib/cs_load.sh
+	# shellcheck source=/home/n/.commash/lib/cs_miscs.sh
 	# shellcheck source=/home/n/.commash/lib/cs_safe.sh
 	# shellcheck source=/home/n/.commash/lib/cs_settings.sh
+	# shellcheck source=/home/n/.commash/lib/cs_tips.sh
+	# shellcheck source=/home/n/.commash/lib/cs_xtrace.sh
 	source "$f"
 done
 

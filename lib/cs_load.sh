@@ -41,7 +41,7 @@ csfunc_unload() {
 
 	# unload functions
 	for f in $(declare -F | grep csfunc_ | awk '{ print $3 }'); do
-		unset -f $f
+		unset -f "$f"
 	done
 
 	# unload variables
@@ -52,7 +52,7 @@ csfunc_unload() {
 			continue
 		fi
 
-		unset $v
+		unset "$v"
 	done
 }
 

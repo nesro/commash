@@ -7,8 +7,8 @@ csfunc_load_settings() {
 	local spacer="$3"
 	local tmp
 
-	tmp=$(grep -o '^[^#]*' $file | tr -d ' ' | paste -s -d "$spacer")
-	eval $variable=\$tmp
+	tmp=$(grep -o '^[^#]*' "$file" | tr -d ' ' | paste -s -d "$spacer")
+	eval "$variable=\$tmp"
 
   ## this was probably too much pointlessly useless
 	# cssc_disable=""

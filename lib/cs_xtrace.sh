@@ -10,6 +10,7 @@
 csfunc_dbg_echo() {
 	# just save 2 lines in debug output
 	# { set +x; } 2>/dev/null # what if xtrace is on but cs_XTRACE is not?
+	cs_XTRACE=${cs_XTRACE:-}
 	if [[ -n "$cs_XTRACE" ]]; then
 		>&2 echo ",DBG: $1"
 		set -x
@@ -18,7 +19,7 @@ csfunc_dbg_echo() {
 
 csfunc_ps4() {
 	local retcode=$?
-	local fromfile="$1"
+	# local fromfile="$1" # we have nice function names, no need for files rn
 	local fromfunction="$2"
 
 # I tried some magic with deleting output of xtrace but it failed for the output
@@ -29,7 +30,7 @@ csfunc_ps4() {
 	# mess before printing PS4 so we need to get rid of this.
 	>&2 echo -en "\r\e[31mDEBUG: \e[0m"
 
-	>&2 printf "[%s][%20s]" $retcode ${fromfunction:0:20}
+	>&2 printf "[%s][%20s]" "$retcode" "${fromfunction:4:24}"
 	for (( i=0; i < ${#FUNCNAME[@]} ; i++ )); do
 			>&2 echo -n "|---";
 	done

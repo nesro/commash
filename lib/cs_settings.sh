@@ -43,6 +43,7 @@ cs_ROOTDIR=~/.commash
 cs_COMMA_SH=$cs_ROOTDIR/comma.sh
 cs_LIBDIR=$cs_ROOTDIR/lib
 cs_SAFEDIR=$cs_ROOTDIR/safe
+cs_SAFE_ENABLED=0
 cs_SAFEDIR_SED=$(echo "$cs_SAFEDIR" | escape_sed)
 cs_RC_HOOK="if [[ -f $cs_COMMA_SH ]]; then source $cs_COMMA_SH; fi"
 cs_RC_HOOK_GREP="if \[\[ -f $cs_COMMA_SH \]\]\; then source $cs_COMMA_SH\; fi"

@@ -71,7 +71,7 @@ csfunc_safe() {
 		PATH="$cs_SAFEDIR:$PATH"
 		echo ",: safe mode enabled. PATH is \"$PATH\""
 	else
-		PATH=$(echo $PATH | $SED "s/$cs_SAFEDIR_SED://")
+		PATH=$(echo "$PATH" | $SED "s/$cs_SAFEDIR_SED://")
 		echo ",: safe mode disabled. PATH is \"$PATH\""
 	fi
 	csfunc_inside=0
@@ -167,7 +167,7 @@ alias ,selftest="csfunc_shellcheck_selftest"
 
 csfunc_expect_test() {
 	echo ",: running expect tests from: $cs_ROOTDIR/tests/run.sh"
-	$cs_ROOTDIR/tests/run.sh
+	"$cs_ROOTDIR/tests/run.sh"
 }
 alias ,expect="csfunc_expect_test"
 

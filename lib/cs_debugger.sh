@@ -13,7 +13,7 @@ csfunc_inside_debugger() {
 
 		if [[ $key == p ]]; then
 
-			echo "\n,dbg: Showing simple commands saved from bash:"
+			echo -e "\n,dbg: Showing simple commands saved from bash:"
 			if (( cspc_command_cnt > 0 )); then
 				for (( cspc_i=0 ; cspc_i < cspc_command_cnt ; cspc_i++ )); do
 					echo "$cspc_i=\"${cs_command_arr[$cspc_i]}\""
