@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # TODO: this is obsolete, because we can handle this in commash_cd function
 
@@ -11,4 +11,4 @@ cshook_cd_oldpwd_before() {
 	fi
 }
 
-csfunc_hook_add_before 'cshook_cd_oldpwd_before'
+# csfunc_hook_add_before 'cshook_cd_oldpwd_before'

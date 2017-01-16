@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ShellCheck
 sc_check=1 # check every command with ShellCheck before executing

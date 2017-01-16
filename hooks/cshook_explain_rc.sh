@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 cs_explain_rc() {
 	local rc=$1
-	
+
 	case $rc in
 	1)
 		echo "(General error)"
@@ -37,7 +37,7 @@ cs_explain_rc() {
 csfunc_rc() {
 	local rc=$1
 	echo ",: return code warning: \$? == $rc $(cs_explain_rc $rc)"
-}	
+}
 
 cshook_explain_rc_after() {
 	if (( cs_rc > 0 )); then
@@ -46,4 +46,3 @@ cshook_explain_rc_after() {
 }
 
 csfunc_hook_add_after 'cshook_explain_rc_after'
-
