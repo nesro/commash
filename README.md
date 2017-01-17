@@ -9,6 +9,17 @@ To uninstall and clean up, run the uninstall script:
 	bash ~/.commash/uninstall.sh
 
 
+
+# bashlex
+bashlex is used for parsing the command.
+
+	echo "a|c" | grep a | grep "|" | grep c
+	           ^-- [1] show pipe flow
+	                    ^-- [2] show pipe flow
+	                               ^-- [3] show pipe flow
+	Choose action:
+
+
 # safe commands
 Commash can alias basics commands (such as rm) and builtins (such as cd) to internal functions written in bash. It can provide more verbose information, tips and it allows easily to revert the command you run (such as restore deleted file).
 

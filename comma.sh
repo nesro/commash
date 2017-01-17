@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
+#
+# feeling brave? try to run:
+# set -T;trap : DEBUG;:&&:&
 
 # if you want to disable commash for a new bash instance:
 # env cs_DISABLED=1 bash
