@@ -181,8 +181,6 @@ csfunc_debug_trap() {
 		# Get last command from history without its number
 		cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
 
-    csfunc_dbg_echo ",dt: cmd to run: $cmd (from $BASH_COMMAND)"
-
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
 
@@ -194,11 +192,23 @@ csfunc_debug_trap() {
 
 				echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> "$CSLOG"
 
+				csfunc_dbg_echo ",dt: cmd to run: \"$cmd\" (from $BASH_COMMAND)"
+
 				#-------------------------------------------------------------------
 				# This is where the commands are executed.
 				# First, we want to exetuce a "blank" command to set the $_ variable.
 				# Second, the actual command is executed.
 				# Third, we want to save both $_ and $? variables.
+
+				# ok here is a problem with quoting cs_last. if it's a ", it will
+				# want to eval """ which is bad and ends with an error
+				# we need to escape that somewhat smart
+				# or maybe this will be sufficent.
+				# the problematic code is f.ex.:
+				# echo \"
+				# echo a
+				cs_last="$(printf "%q" $cs_last)"
+
 				eval "
 	set -u
 	csfunc_restore_internals $cs_rc \"$cs_last\"

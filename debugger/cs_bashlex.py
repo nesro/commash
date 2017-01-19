@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 
+# READ THIS:
+#
+# commash bashlex wrapper:
+#
+# 1) get a bash command to be executed from arguments, this script is called as:
+#    local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
+# 2) print choices in a nice way for the user to the stderr
+# 3) print choices in a nice way for bash to the stdout
+# 4) exit the script and let bash do the rest
+#
+
+# BUGS:
+# multiline commands are not printed nicely. idk if it's worth it to
+# support that now
+#
+# echo "a
+# b" | grep a
+#            ^-- [1] show pipe flow
+#
+
+#-------------------------------------------------------------------------------
+
+
 # TODO:
 # this has similar functionality, look up how they visit AST
 # https://github.com/idank/explainshell
@@ -23,6 +46,8 @@
 #
 #-------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 import sys
 from bashlex import parser, ast
 cmd = ' '.join(sys.argv[1:])
@@ -40,6 +65,59 @@ menucnt = 1
 # https://github.com/idank/bashlex/blob/master/bashlex/ast.py#L28
 
 #-------------------------------------------------------------------------------
+
+# TODO: now send information needed to commash and show the actual pipe flow
+class pipenodevisitor(ast.nodevisitor):
+	def visitpipe(self, n, parts):
+		global menucnt
+		# print(n.dump())
+		spaces = ' ' * (n.pos[0])
+
+		# stderr for user
+		print(spaces + '^-- [' + str(menucnt) + '] show pipe flow (command: '+ cmd[0:n.pos[0]] +')', file=sys.stderr)
+
+		# stdout for bash
+		print(cmd[0:n.pos[0]])
+		menucnt += 1
+
+#-------------------------------------------------------------------------------
+if __name__ == '__main__':
+	# print('~~~~ commash bashlex begin ~~~~\n')
+
+	print(cmd, file=sys.stderr)
+	parsed = parser.parse(cmd)
+	visitor = pipenodevisitor()
+	for p in parsed:
+		visitor.visit(p)
+
+	# print >> sys.stderr, 'My error message'
+	# print("fatal error", file=sys.stderr)
+
+	# print('\n~~~~ commash bashlex end   ~~~~')
+#-------------------------------------------------------------------------------
+
+# print(*(sys.argv))
+
+# TODO: print this complete AST only when in some debugging mode
+# if True:
+# 	print('~~ bashlex ast of: "' + cmd + '" ~~')
+#
+# 	parts = parser.parse(cmd)
+#
+#
+#
+# 	# for p in parts:
+# 	# 	print(p.dump())
+# 	# print('~~ ^^^^')
+#
+# 	positions = []
+# 	for p in parts:
+# 		print(p)
+# 		visitor = nodevisitor(positions)
+#         visitor.visit(p)
+# 		# print(ast.dump())
+#
+# 	print('~~ bashlex end ~~')
 
 # class innernodevisitor(ast.nodevisitor):
 # 	def visitcommand(self, n, parts):
@@ -70,52 +148,3 @@ menucnt = 1
 #
 # 		return True
 #-------------------------------------------------------------------------------
-
-# TODO: now send information needed to commash and show the actual pipe flow
-class pipenodevisitor(ast.nodevisitor):
-	def visitpipe(self, n, parts):
-		global menucnt
-		# print(n.dump())
-		spaces = ' ' * (n.pos[0])
-		print(spaces + '^-- [' + str(menucnt) + '] show pipe flow')
-		menucnt += 1
-
-#-------------------------------------------------------------------------------
-
-if __name__ == '__main__':
-	print('~~~~ commash bashlex begin ~~~~\n')
-	print(cmd)
-	parsed = parser.parse(cmd)
-	visitor = pipenodevisitor()
-	for p in parsed:
-		visitor.visit(p)
-	print('Choose action: ')
-	print('\n~~~~ commash bashlex end   ~~~~')
-
-
-
-# print(*(sys.argv))
-
-
-
-
-# TODO: print this complete AST only when in some debugging mode
-# if True:
-# 	print('~~ bashlex ast of: "' + cmd + '" ~~')
-#
-# 	parts = parser.parse(cmd)
-#
-#
-#
-# 	# for p in parts:
-# 	# 	print(p.dump())
-# 	# print('~~ ^^^^')
-#
-# 	positions = []
-# 	for p in parts:
-# 		print(p)
-# 		visitor = nodevisitor(positions)
-#         visitor.visit(p)
-# 		# print(ast.dump())
-#
-# 	print('~~ bashlex end ~~')

@@ -18,6 +18,9 @@ else
 	set +x
 fi
 
+# for ultimate and quick debugging, just uncomment this line
+# set -xv
+
 #-------------------------------------------------------------------------------
 
 # TODO: add some nice text since this is the first file people will open
