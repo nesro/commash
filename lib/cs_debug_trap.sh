@@ -147,7 +147,14 @@ csfunc_debug_trap() {
 	#---------------------------------------------------------------------------
 
 	# We will get error from set -u if we do not assign default values here.
+
+	# this can be used f.ex. from rm wrapper to set the right return code
+	if [[ -n "$cs_extern_rc" ]]; then
+		csfunc_dbg_echo ",dt: set ? from extern: extern_rc=$cs_extern_rc"
+		cs_rc=$cs_extern_rc
+	fi
 	cs_rc=${cs_rc:-0}
+
 	cs_last=${cs_last:-''}
 
 	# These are some env variables that makes troubles too. Posible TODO:

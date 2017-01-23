@@ -76,3 +76,8 @@ csfunc_lib_hooks_unload() {
 	:
 	# TODO?
 }
+
+csfunc_safe_hooks_after() {
+	# TODO: list of hooks after safe commands?
+	cshook_explain_rc_after
+}

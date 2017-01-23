@@ -4,6 +4,11 @@ cshook_bashlex_simple_before() {
 	local timestamp="$1"
 	local cmd="$2"
 
+	# TODO: not always pls
+	if :; then
+		return
+	fi
+
 	echo -e ",: show pipe flow:\n"
 
 	local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")

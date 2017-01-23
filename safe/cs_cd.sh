@@ -6,17 +6,35 @@
 # man page: help cd
 # source code: http://git.savannah.gnu.org/cgit/bash.git/tree/builtins/cd.def
 
+csfunc_cd_cd() {
+	echo ",: OLDPWD: $OLDPWD"
+	echo ",:    PWD: $PWD"
+	echo -n ",: NEWPWD: "
+	if [[ $# == 1 ]]; then
+		builtin cd "$1"
+	else
+		builtin cd
+	fi
+	pwd
+}
+
 csfunc_cd()  {
 		if (( $# == 0 )); then
 				echo ",: cd to ~, which is $HOME"
-				builtin cd
+				csfunc_cd_cd
 				return
 		fi
 
 		if (( $# == 1 )) && [[ "$1" == $HOME ]]; then
-			csfunc_tip cdhome "You don't need to specify your home directory. Just " \
-				"run cd without arguments."
-			builtin cd
+			csfunc_tip cdhome "You don't need to specify your home directory. Just \
+run cd without arguments."
+			csfunc_cd_cd
+			return
+		fi
+
+		if (( $# == 1 )) && [[ "$1" == "$OLDPWD" ]]; then
+			csfunc_tip cdoldpwd "You can use \"cd -\" to go back to \$OLDPWD"
+			csfunc_cd_cd "$1"
 			return
 		fi
 
@@ -29,8 +47,8 @@ csfunc_cd()  {
 		if (( $# > 1 )); then
 			# TODO: check only valid arguments (from "help cd"), oterwise raise an
 			# error
-			echo ",: cd was run with more than argument. this extended " \
-			"functionality is not supported yet. so we will just execute your command"
+			echo ",: cd was run with more than argument. this extended \
+functionality is not supported yet. so we will just execute your command"
 			echo ", executing: cd $@"
 			builtin cd "$@"
 			return
@@ -38,9 +56,8 @@ csfunc_cd()  {
 
 		if [[ ! -d "$1" ]]; then
 			echo ",: The directory \"$PWD/$1\" doesn't exists. Do you want to create it? [y]es/[n]o"
-			while :; do
-				read -rn1 yn
-				case $yn in
+			while read -rn1 k; do
+				case $k in
 					y)
 						mkdir -p "$1"
 						break
@@ -54,12 +71,8 @@ csfunc_cd()  {
 						;;
 				esac
 			done
-			echo # newline afer y or n
+			echo
 		fi
 
-		echo ",: OLDPWD: $OLDPWD"
-		echo ",:    PWD: $PWD"
-		echo -n ",: NEWPWD: "
-    cd "$1"
-		pwd
+    csfunc_cd_cd "$1"
 }
