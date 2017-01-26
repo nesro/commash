@@ -13,18 +13,7 @@ To uninstall and clean up, run the uninstall script:
 # bashlex
 bashlex is used for parsing the command. so we run only parts
 
-	n@t:~$ echo "a|c" | grep a | grep "|" | grep c
-	,: show pipe flow:
-
-	echo "a|c" | grep a | grep "|" | grep c
-	           ^-- [1] show pipe flow (command: echo "a|c" )
-	                    ^-- [2] show pipe flow (command: echo "a|c" | grep a )
-	                               ^-- [3] show pipe flow (command: echo "a|c" | grep a | grep "|" )
-	,: Select your option or [q]uit or [r]un normally 2
-	,: Executing: "echo "a|c" | grep a "
-	a|c
-
-
+![debugger_v0](https://raw.githubusercontent.com/nesro/commash/master/miscs/debugger_v0.png)
 
 # safe commands
 Commash can alias basics commands (such as rm) and builtins (such as cd) to internal functions written in bash. It can provide more verbose information, tips and it allows easily to revert the command you run (such as restore deleted file).

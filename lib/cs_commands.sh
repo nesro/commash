@@ -132,7 +132,7 @@ cs() {
 # nice.
 alias ,="cs"
 alias ,e=", e"
-alias ,d=", d"
+# alias ,d=", d"
 
 csfunc_debug() {
 	csfunc_inside=1
@@ -193,3 +193,14 @@ csfunc_xtrace_off() {
 alias ,xoff="csfunc_xtrace_off"
 
 #-------------------------------------------------------------------------------
+
+
+csfunc_debugger_on() {
+	cs_debugger_on=1
+}
+alias ,don="csfunc_debugger_on"
+
+csfunc_debugger_off() {
+	cs_debugger_on=0
+}
+alias ,doff="csfunc_debugger_off"

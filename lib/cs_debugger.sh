@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# this is the old and dirty version of the debugger.
+# it somehow works, but we don't have much control over what is happening
+
 # Commash debugger library
 
 csfunc_inside_debugger() {

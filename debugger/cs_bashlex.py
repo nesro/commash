@@ -66,26 +66,60 @@ menucnt = 1
 
 #-------------------------------------------------------------------------------
 
-# TODO: now send information needed to commash and show the actual pipe flow
 class pipenodevisitor(ast.nodevisitor):
+	# XXX: I'm stupid. I don't need this to traverse recursively
+	# def visitpipeline(self, n, parts):
+	# 	print('visitpipeline!', file=sys.stderr)
+	# 	return True
+	#
+	# def visitcommand(self, n, parts):
+	# 	print('visitcommand!', file=sys.stderr)
+	# 	return True
+	#
+	# def visitword(self, n, word):
+	# 	print('visitword!', file=sys.stderr)
+	# 	return True
+
 	def visitpipe(self, n, parts):
 		global menucnt
 		# print(n.dump())
 		spaces = ' ' * (n.pos[0])
 
 		# stderr for user
-		print(spaces + '^-- [' + str(menucnt) + '] show pipe flow (command: '+ cmd[0:n.pos[0]] +')', file=sys.stderr)
+		print(spaces + '^-- [' + str(menucnt) + '] show pipe flow: '+ cmd[0:n.pos[0]] +'', file=sys.stderr)
 
 		# stdout for bash
 		print(cmd[0:n.pos[0]])
 		menucnt += 1
+		return True
+
+
+	def visitcommandsubstitution(self, n, command):
+		global menucnt
+		spaces = ' ' * (n.pos[0])
+
+		# stderr for user
+		print(spaces + '^-- [' + str(menucnt) + '] show substituion: '+ cmd[n.pos[0]:n.pos[1]] +'', file=sys.stderr)
+
+		# stdout for bash
+		print('echo "' + cmd[n.pos[0]:n.pos[1]] + '"')
+		menucnt += 1
+
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
 	# print('~~~~ commash bashlex begin ~~~~\n')
 
-	print(cmd, file=sys.stderr)
+
 	parsed = parser.parse(cmd)
+
+	if False:
+		print("\n<bashlex ast dump>", file=sys.stderr)
+		for p in parsed:
+			print(p.dump(), file=sys.stderr)
+		print("</bashlex ast dump>\n", file=sys.stderr)
+
+	print(cmd, file=sys.stderr)
 	visitor = pipenodevisitor()
 	for p in parsed:
 		visitor.visit(p)

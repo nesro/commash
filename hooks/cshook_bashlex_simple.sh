@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
+# echo "(the year is $(date +%Y)" | grep 2017
+# cs_debugger_on=1
+
 cshook_bashlex_simple_before() {
 	local timestamp="$1"
 	local cmd="$2"
 
-	# TODO: not always pls
-	if :; then
+	# TODO: dont show anything if there is nothing to show?
+
+	# XXX: is the term debugger right? we are only running parts of the command
+	# now
+	if [[ $cs_debugger_on != 1 ]]; then
 		return
 	fi
 
-	echo -e ",: show pipe flow:\n"
+	echo -e ",: commash debugger:\n"
 
 	local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
 
@@ -17,7 +23,7 @@ cshook_bashlex_simple_before() {
 	IFS=$'\n' lines=($bashlex_out)
 	IFS=$OLDIFS
 
-	>&2 echo -n ",: Select your option or [q]uit or [r]un normally "
+	>&2 echo -ne "\n,: Select your option or [q]uit or [r]un normally "
 	while :; do
 		read -rn1 key
 
