@@ -24,3 +24,34 @@ csfunc_load_settings() {
 	# 	fi
 	# done < "$cssc_disable_list_file"
 }
+
+csfunc_yesno() {
+	while read -rn1 k; do
+		case "$k" in
+			y)
+				return 0
+				;;
+			n)
+				return 1
+				;;
+			*)
+				echo ",yn: press [y]es or [n]o"
+				;;
+		esac
+	done
+}
+
+csfunc_run_cmd_ask() {
+	echo ",: Please confirm runnnig: \"$@\"? [y]es [n]o"
+	if csfunc_yesno; then
+		eval "$@"
+	else
+		echo ",: command \"$@\" was NOT run"
+	fi
+}
+
+csfunc_plural_s() {
+	if (( $1 > 1 )); then
+		echo "s"
+	fi
+}
