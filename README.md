@@ -13,7 +13,7 @@ To uninstall and clean up, run the uninstall script:
 # bashlex
 bashlex is used for parsing the command. so we run only parts
 
-![debugger_v0](https://raw.githubusercontent.com/nesro/commash/master/miscs/debugger_v0.png)
+![debugger_v0](./miscs/debugger_v0.png)
 
 # safe commands
 Commash can alias basics commands (such as rm) and builtins (such as cd) to internal functions written in bash. It can provide more verbose information, tips and it allows easily to revert the command you run (such as restore deleted file).
