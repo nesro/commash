@@ -24,5 +24,5 @@ cshook_last_argument_tip_after() {
 	fi
 }
 
-#csfunc_hook_add_before 'cshook_last_argument_tip_before'
-#csfunc_hook_add_after 'cshook_last_argument_tip_after'
+#csfunc_hook_add_before 1000 'cshook_last_argument_tip_before'
+#csfunc_hook_add_after 1000 'cshook_last_argument_tip_after'

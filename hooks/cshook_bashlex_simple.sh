@@ -72,4 +72,4 @@ cshook_bashlex_simple_before() {
 # OUT="<actual output>"
 # CHOICES="[1] adfasddfasdfsaddf CSDELIMETER [2] "
 
-csfunc_hook_add_before 'cshook_bashlex_simple_before'
+csfunc_hook_add_before 1000 'cshook_bashlex_simple_before'

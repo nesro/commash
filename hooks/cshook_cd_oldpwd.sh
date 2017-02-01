@@ -11,4 +11,4 @@ cshook_cd_oldpwd_before() {
 	fi
 }
 
-# csfunc_hook_add_before 'cshook_cd_oldpwd_before'
+# csfunc_hook_add_before 1000 'cshook_cd_oldpwd_before'

@@ -45,4 +45,4 @@ cshook_explain_rc_after() {
 	fi
 }
 
-csfunc_hook_add_after 'cshook_explain_rc_after'
+csfunc_hook_add_after 1000 'cshook_explain_rc_after'

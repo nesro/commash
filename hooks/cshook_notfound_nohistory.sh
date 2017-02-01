@@ -58,4 +58,4 @@ cshook_nofound_nohistory_after() {
 	fi
 }
 
-csfunc_hook_add_after 'cshook_nofound_nohistory_after'
+csfunc_hook_add_after 1000 'cshook_nofound_nohistory_after'

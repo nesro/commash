@@ -7,11 +7,46 @@
 # We want to make things modular. Some basic and checking functionality should
 # be easily added.
 
+
+#-------------------------------------------------------------------------------
+csfunc_hooks_info() {
+	echo ",: Hooks are located in the ~/.commash/hooks directory."
+	echo ",: Every hook has a pritority. The lower the number, the higher the priority."
+	echo ",: If a loading hook has a priority that is already taken, it has"
+
+	echo ",hooks before:"
+	for i in "${!cs_HOOKS_BEFORE[@]}"; do
+		echo ",: priority=$i function=${cs_HOOKS_BEFORE[$i]}"
+	done
+	echo ",hooks after:"
+	for i in "${!cs_HOOKS_AFTER[@]}"; do
+		echo ",: priority=$i function=${cs_HOOKS_AFTER[$i]}"
+	done
+}
+alias ,hooks="csfunc_hooks_info"
+#-------------------------------------------------------------------------------
+
+# $1 == priority. the lower, the higher priority
+# $2 == hook function
 csfunc_hook_add_before() {
-	cs_HOOKS_BEFORE+=("$1")
+	local priority="$1"
+
+	while [[ -n "${cs_HOOKS_BEFORE[$priority]}" ]]; do
+		csfunc_dbg_echo "before hook $2 has the same priority as ${cs_HOOKS_BEFORE[$priority]}, increasing priority"
+		priority=$(( priority + 1 ))
+	done
+
+	cs_HOOKS_BEFORE[$priority]=$2
 }
 csfunc_hook_add_after() {
-	cs_HOOKS_AFTER+=("$1")
+	local priority="$1"
+
+	while [[ -n "${cs_HOOKS_AFTER[$priority]}" ]]; do
+		csfunc_dbg_echo "after hook $2 has the same priority as ${cs_HOOKS_AFTER[$priority]}, increasing priority"
+		priority=$(( priority + 1 ))
+	done
+
+	cs_HOOKS_AFTER[$priority]=$2
 }
 
 # The hook functions are called like this:
@@ -23,7 +58,6 @@ csfunc_hook_iterate_before() {
 			ret=1
 		fi
 	done
-
 	return $ret
 }
 csfunc_hook_iterate_after() {
@@ -38,7 +72,8 @@ csfunc_hook_iterate_after() {
 
 #-------------------------------------------------------------------------------
 
-cs_add_timestamp() {
+# XXX: this is unused atm
+csfunc_add_timestamp() {
 	while read -r line; do
     		echo "$(date +%Y-%m-%d-%H-%M-%S-%N)|$1|$line" >> /tmp/.cslog
     		echo "$line"
@@ -57,10 +92,10 @@ csfunc_check_var() {
 csfunc_lib_hooks_load() {
 	csfunc_check_var cs_ROOTDIR
 
-	cs_HOOKS_BEFORE=()
-	cs_HOOKS_AFTER=()
-	cs_HOOKS_DIR=$cs_ROOTDIR/hooks
+	declare -ag cs_HOOKS_BEFORE
+	declare -ag cs_HOOKS_AFTER
 
+	cs_HOOKS_DIR=$cs_ROOTDIR/hooks
 
 	# TODO: add a comment what is this and why we need that
 	cspc_first=1
@@ -69,7 +104,6 @@ csfunc_lib_hooks_load() {
 	for hookfile in $cs_HOOKS_DIR/cshook_*.sh; do
 		source "$hookfile"
 	done
-
 }
 
 csfunc_lib_hooks_unload() {
