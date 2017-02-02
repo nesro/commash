@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # Commash history library
 
@@ -10,5 +11,3 @@ cs_ts() {
     		echo "$line"
 	done
 }
-
-

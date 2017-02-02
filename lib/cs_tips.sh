@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # we want to show some tips or useful information
 # but we also want to turn off the tips users already know

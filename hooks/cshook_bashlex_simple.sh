@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # echo "(the year is $(date +%Y)" | grep 2017
 # cs_debugger_on=1

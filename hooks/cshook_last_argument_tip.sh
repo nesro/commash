@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # XXX: I don't know if this entire hook is a good idea. It can cause more
 # problems than benefits.

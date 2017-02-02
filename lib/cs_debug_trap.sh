@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # Workaround over a DEBUG trap so that we can trigger our code for every command
 # run from a command line

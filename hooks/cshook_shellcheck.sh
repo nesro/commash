@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # ShellCheck
 sc_check=1 # check every command with ShellCheck before executing

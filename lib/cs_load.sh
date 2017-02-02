@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 csfunc_main() {
 	csfunc_lib_hooks_load

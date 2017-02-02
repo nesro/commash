@@ -36,6 +36,12 @@ cs_explain_rc() {
 
 csfunc_rc() {
 	local rc=$1
+
+	# Don't print about command not found when there is an active hook for it
+	if (( rc == 127 )) && [[ -n "$cs_HOOK_NOTFOUND_ACTIVE" ]]; then
+		return
+	fi
+	
 	echo ",: return code warning: \$? == $rc $(cs_explain_rc $rc)"
 }
 

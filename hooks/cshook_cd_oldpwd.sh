@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # TODO: this is obsolete, because we can handle this in commash_cd function
 

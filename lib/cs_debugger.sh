@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/nesro/commash
 
 # this is the old and dirty version of the debugger.
 # it somehow works, but we don't have much control over what is happening
