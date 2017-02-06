@@ -67,6 +67,11 @@ csfunc_levenshtein() {
 	if [ "${#1}" -lt "${#2}" ]; then
 		csfunc_levenshtein "$2" "$1"
 	else
+
+		# if (( (${#1} - ${#2}) < 2 )); then
+		# 	echo "$1 a $2 rovnou ne?"
+		# fi
+
 		local str1len=$((${#1}))
 		local str2len=$((${#2}))
 		local d i j
@@ -109,6 +114,32 @@ csfunc_levenshtein() {
 				fi
 			done
 		done
+		# >&2 echo lev ${d[str1len+str1len*(str2len)]} $1 $2
 		echo ${d[str1len+str1len*(str2len)]}
 	fi
 }
+
+#-------------------------------------------------------------------------------
+
+# I bet this is not the best way how pre-type a command. but it works :)
+# TODO: find a real way how to do it
+csfunc_pretype() {
+	# sleep is needed for giving bash time to show next prompt
+	# both commands needs to be run on background bash can show next prompt
+	# output about process end is redirected to /dev/null
+	( sleep 0.1; xdotool type "$1" & ) >/dev/null 2>&1
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+# EOF
