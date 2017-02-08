@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
 
+# TODO: there is a bug. when the command is: "\rm a", the \r get expanded
+
 # ShellCheck
 sc_check=1 # check every command with ShellCheck before executing
 sc_path=~/.cabal/bin/shellcheck

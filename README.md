@@ -13,6 +13,7 @@ To uninstall and clean up, run the uninstall script:
 
 # notfound hook
 With pre and post hooks, it's easy to extend basic functionality. Commash's "notfound handler" is an example that triggers when return code of a command is 127.
+
 ![notfound_v0](./miscs/notfound_v0.png)
 
 # bashlex
