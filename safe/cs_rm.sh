@@ -3,21 +3,52 @@
 
 # commash wrapper for the rm command
 
+cs_TRASHDIR="$cs_ROOTDIR/trash"
+
+#-------------------------------------------------------------------------------
+
+### we will use this trash "api"
+# git clone https://github.com/andreafrancia/trash-cli.git
+# cd trash-cli/
+# python setup.py install --user
+
+# trash-cli has really weird cli interface for us. our wrappers will be weird
+# too
+
+csfunc_trashcli_check() {
+	local trash_restore_path=$(type -p trash-restore)
+	if [[ -z "$trash_restore_path" ]]; then
+		echo ",: trash-cli with trash-restore command not installed, you can install it by runnnig:"
+		echo ",: git clone https://github.com/nesro/trash-cli"
+		echo ",: cd trash-cli"
+		echo ",: python setup.py install --user"
+		return 1
+	fi
+	return 0
+}
+
+csfunc_trashcli_rm() {
+	trash-put "$1"
+}
+
+csfunc_trashcli_restore() {
+	trash-restore --original-location "$(realpath $1)"
+}
+
 #-------------------------------------------------------------------------------
 
 # We don't want the user to get used to the "safe" version of rm.
-
 # This function gets aliased to rm from cs_safe.sh
 csfunc_rm() {
-	echo ",: use ,rm for commash wrapper or /bin/rm for original rm"
+	echo ",: Use ,rm for commash wrapper or /bin/rm for original rm."
 }
 alias ,rm=csfunc_rm_cswrapp
+# TODO: pretype the fixed command?
 
 #-------------------------------------------------------------------------------
 
 # TODO: alias sudo='sudo ' to find our alias when using sudo
 #       we probably want to use this wrapper even as a root?
-
 
 # man page: man rm
 # source code: http://lingrok.org/xref/coreutils/src/rm.c
@@ -43,72 +74,65 @@ alias ,rm=csfunc_rm_cswrapp
 # mkdir dir
 # touch {a..z}.txt {a..m}.png a b c.arj dir/{n..z}.c
 # rm *
-#
-#
-# ,rm: [r]emove, [q]uit, move to [t]rash
-#
-# ,rm: more [d]etails
-# ,rm: [r]emove
-# ,rm: move to [t]rash
-# ,rm: [q]uit
 
 #-------------------------------------------------------------------------------
 
-# https://github.com/andreafrancia/trash-cli/blob/master/trashcli/put.py#L128
 csfunc_rm_trash() {
-
-
-	#-----------------------------------------------------------------------------
-	# just rename in place
-
-	# TODO: logfile
-	for f in $leftovers; do
-		echo ",: mv \"$f\" \".cstrash_$f\""
-		mv "$f" ".cstrash_$f"
-	done
-	return
-	#-----------------------------------------------------------------------------
-
-
-	# TODO: what about adding another choice here: [c]ompress. that will
-	# compress the files before moving them into the trash?
-
-	# TODO: XXX: we don't handle symlinks now
-
-	# TODO: do I even want this?
-	# create a directory for all the things we're going to "remove"
-	# because we want an easy method to revert the changes
-
-	# 1) create the trash direcoty with timestamp as a name
-	local ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
-	local trashdir="$cs_ROOTDIR/trash/$ts"
-	if [[ -d $trashdir ]]; then
-		echo ",rm: Something went wrong. The dir $trashdir already exists."
+	local leftovers="$@"
+	if ! csfunc_trashcli_check; then
+		echo ",rm trash: trash-cli not available. No action."
 		return
 	fi
-	mkdir -p $trashdir
-	echo ",rm: trashdir is: $trashdir"
 
-	# 1) move every file/direcoty to the trash directory
+	mkdir -p $cs_TRASHDIR
+
+	local ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
+	local trashfile="$cs_TRASHDIR/$ts"
+	if [[ -f $trashfile ]]; then
+		echo ",rm trash: Something went wrong. The file $trashfile already exists."
+		return
+	fi
+
+	echo ",rm: leftovers=$leftovers"
+
 	for f in $leftovers; do
-
-		if [[ ! -e $f ]]; then
-			echo ",rm trash: path \"$f\" doesn't exists. skipping"
-			continue
-		fi
-
-		local fullpath=$(realpath $f | sed 's/\//CSDELIM/g')
-		echo ",rm trash: mv $f \$trashdir"
-		mv $f $trashdir/$fullpath
+		echo ",rm trash: trashing file $(realpath $f)"
+		trash-put "$f"
+		echo "$(realpath $f)" >> $trashfile
 	done
 
-	# file with info what happened
-	echo "PWD=$PWD" > $trashdir/info.txt
-	echo "whoami=$(whoami)" >> $trashdir/info.txt
-	echo "hostname=$(hostname)" >> $trashdir/info.txt
-
-	echo ",rm trash: done"
+	echo ",rm trash: done. use ,rmr or ,rmrestore to restore the files"
 }
+
+
+csfunc_rm_restore() {
+	# TODO: regex to check the file name format?
+	local i=1
+	declare -a rms
+	for f in $cs_TRASHDIR/*; do
+		t=${f##*/}
+		echo -n "[$i] "
+		rms[$i]=$f
+		echo $t | awk -F'-' '{ print $1 "." $2 "." $3 " " $4 ":" $5 ":" $6 }'
+
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			echo "                       - $line"
+		done < "$f"
+
+		i=$(( i + 1 ))
+	done
+
+	echo "choose:"
+	choice=$(head -1)
+
+	while IFS='' read -r line || [[ -n "$line" ]]; do
+		echo ",rm restore: restoring $line"
+		csfunc_trashcli_restore $line
+	done < "${rms[$choice]}"
+
+}
+alias ,rmr="csfunc_rm_restore"
+alias ,rmrestore="csfunc_rm_restore"
 
 # arguments are files to delete
 csfunc_rm_show_to_delete() {
@@ -285,6 +309,7 @@ set +e
 		echo
 		case "$k" in
 		r)
+			echo ",rm: /bin/rm $save_opts"
 			/bin/rm $save_opts
 			cs_extern_rc=$?
 
