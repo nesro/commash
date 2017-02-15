@@ -57,6 +57,10 @@ csfunc_restore_internals() {
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
 
+	# we set up -u before executing the command in eval. if we ctrl-c the command
+	# the -u flag is not unset and can cause problems
+	set +u
+
   # cs_RUN == 1 : the command will be executed normally
   # cs_RUN == 0 : no command will be executed
   cs_RUN=0
