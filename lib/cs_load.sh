@@ -2,29 +2,37 @@
 # https://github.com/nesro/commash
 
 csfunc_main() {
+
+	if ! csfunc_run_install_if_needed; then
+		>&2 echo ",: commash won't load because it's not installed properly"
+		return 1
+	fi
+
 	csfunc_lib_hooks_load
 	csfunc_lib_safe_load
 	csfunc_lib_tips_load
 	#csfunc_lib_debugger_load
-	csfunc_run_install_if_needed
 
 
-	case $BASH_VERSION in
-	4.4*)
-		echo "You have bash 4.4. Nice!"
-		;;
-	4.3*)
-		echo "You have bash 4.3."
-		;;
-	*)
-		echo "Either you're not using bash, or you use some older version. " \
-			"Commash might not work."
-		;;
-	esac
+	# XXX: since we're not using new things from 4.4, this is not needed atm
+	# case $BASH_VERSION in
+	# 4.4*)
+	# 	echo "You have bash 4.4. Nice!"
+	# 	;;
+	# 4.3*)
+	# 	echo "You have bash 4.3."
+	# 	;;
+	# *)
+	# 	echo "Either you're not using bash, or you use some older version. " \
+	# 		"Commash might not work."
+	# 	;;
+	# esac
 
   csfunc_debug_trap_enable
 
 	csfunc_welcome
+
+	return 0
 }
 
 csfunc_unload() {

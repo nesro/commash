@@ -67,5 +67,5 @@ fi
 
 #-------------------------------------------------------------------------------
 
-csfunc_main || >&2 echo -e "\n!!! commash is broken :( \
-TODO: auto unload things, navigate user how to safely uninstall?\n"
+# main function is in lib/cs_load.sh
+csfunc_main || >&2 echo "Commash seems to be broken. :("

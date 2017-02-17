@@ -28,11 +28,31 @@ csfunc_trashcli_check() {
 }
 
 csfunc_trashcli_rm() {
-	trash-put "$1"
+	trash_put=$(type -p trash-put)
+	if [[ -z "$trash_put" ]]; then
+		if [[ -x ./trash-cli/trash-put ]]; then
+			trash_put=./trash-cli/trash-put
+		else
+			echo ",rm: trash-put command not found."
+			return
+		fi
+	fi
+
+	$trash_put "$1"
 }
 
 csfunc_trashcli_restore() {
-	trash-restore --original-location "$(realpath $1)"
+	trash_restore=$(type -p trash-restore)
+	if [[ -z "$trash_restore" ]]; then
+		if [[ -x ./trash-cli/trash-restore ]]; then
+			trash_restore=./trash-cli/trash-restore
+		else
+			echo ",rm: trash-restore command not found."
+			return
+		fi
+	fi
+
+	$trash_put --original-location "$(realpath $1)"
 }
 
 #-------------------------------------------------------------------------------

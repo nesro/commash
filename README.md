@@ -1,15 +1,16 @@
 # commash
 Comma-shell, an interactive shell debugger
 
-The best way to install is to clone this pository into your home directory and run the main file
-	git clone https://github.com/nesro/commash ~/.commash
-	bash ~/.commash/comma.sh
+# installation
+Since this is not a stable release, it's highly recommended to install commash into a virtual machine.
+You can found my Virtualbox setup at the end of this README.
+Install dependencies, clone commash into your home directory and run the main file. The rest will be installed automatically.
 
-To uninstall and clean up, run the uninstall script:
-	bash ~/.commash/uninstall.sh
-
-
-
+    sudo apt update
+		sudo apt install git cabal-install python-pip xdotool -y
+		sudo pip install bashlex
+    git clone https://github.com/nesro/commash ~/.commash
+    bash ~/.commash/comma.sh
 
 # notfound hook
 With pre and post hooks, it's easy to extend basic functionality. Commash's "notfound handler" is an example that triggers when return code of a command is 127.
@@ -32,3 +33,28 @@ This work is being done as my diploma thesis, here are instructions in the czech
  - Proveďte rešerši existujících nástrojů pro statickou analýzu, krokování a hledání chyb v BASH skriptech.
  - Navrhněte a implementujte nástroj, který umožní psát uživatelské skripty pro analýzu příkazů a ovlivňování jejich spouštění a vykonávání. Nástroj musí umožňovat krokovat složitější skripty po jednotlivých příkazech. Pro analýzu spouštěných skriptů využijte vhodný nástroj z rešeršní části.
  - Vytvořte ukázkové skripty pro zvrácení, či zamezení efektů základních příkazů z GNU coreutils. Zaznamenávejte jejich spouštění a umožněte jimi provedené změny vrátit do původního stavu.
+
+# virtual machine
+
+I know that you know how to setup a VM. I just want to share my tested setup.
+
+My Virtualbox version is 5.0.32_Ubuntu r112930 and I'm running Ubuntu 16.04. Image and parameters:
+
+    image: http://gensho.acc.umu.se/debian-cd/current/amd64/iso-cd/debian-8.7.1-amd64-lxde-CD-1.iso
+    md5sum: 0b03a80416799d064c985bd5ca1e5f68
+    2GB RAM (this is important because building Haskell programs needs a lot of memory)
+    8GB disk space
+
+Add you (a user) to the sudoers group:
+
+    su
+    adduser username sudo
+
+Comment out the installation CD and add "contrib non-free" sources:
+
+    sudo vi /etc/apt/sources.list
+
+Install virtualbox guest additions so that you can copy from outside of VM:
+
+    sudo apt update
+    sudo apt install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 virtualbox-guest-additions-iso

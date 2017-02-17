@@ -152,10 +152,7 @@ alias ,n=",nd"
 #-------------------------------------------------------------------------------
 
 csfunc_welcome() {
-	cat <<EOF
-	,: Commash has been loaded. But it's disabled by default.
-	,: You can enable it by running: ", enable" (or just ", e" )
-EOF
+	>&2 echo ",: commash is enabled, run ,h or ,help for help"
 }
 
 #-------------------------------------------------------------------------------
@@ -198,10 +195,12 @@ alias ,xoff="csfunc_xtrace_off"
 
 csfunc_debugger_on() {
 	cs_debugger_on=1
+	echo ",: turning debugger on"
 }
 alias ,don="csfunc_debugger_on"
 
 csfunc_debugger_off() {
 	cs_debugger_on=0
+	echo ",: turning debugger off"
 }
 alias ,doff="csfunc_debugger_off"
