@@ -7,8 +7,8 @@ You can found my Virtualbox setup at the end of this README.
 Install dependencies, clone commash into your home directory and run the main file. The rest will be installed automatically.
 
     sudo apt update
-		sudo apt install git cabal-install python-pip xdotool -y
-		sudo pip install bashlex
+    sudo apt install git cabal-install python-pip xdotool -y
+    sudo pip install bashlex
     git clone https://github.com/nesro/commash ~/.commash
     bash ~/.commash/comma.sh
 
