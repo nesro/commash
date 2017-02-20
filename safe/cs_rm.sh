@@ -52,7 +52,7 @@ csfunc_trashcli_restore() {
 		fi
 	fi
 
-	$trash_put --original-location "$(realpath $1)"
+	$trash_restore --original-location "$(realpath $1)"
 }
 
 #-------------------------------------------------------------------------------
@@ -113,15 +113,18 @@ csfunc_rm_trash() {
 		return
 	fi
 
-	echo ",rm: leftovers=$leftovers"
+	#echo ",rm: leftovers=$leftovers"
 
 	for f in $leftovers; do
-		echo ",rm trash: trashing file $(realpath $f)"
-		trash-put "$f"
+		# echo ",rm trash: trashing file $(realpath $f)"
+		if ! trash-put "$f"; then
+			echo "rm trash: trash-put \"$f\" has failed"
+		fi
+
 		echo "$(realpath $f)" >> $trashfile
 	done
 
-	echo ",rm trash: done. use ,rmr or ,rmrestore to restore the files"
+	echo ",rm trash: done. use ,rmr or ,rmrestore to restore the files. trashfile is $trashfile"
 }
 
 
@@ -129,15 +132,50 @@ csfunc_rm_restore() {
 	# TODO: regex to check the file name format?
 	local i=1
 	declare -a rms
+
+	local show=$(( ${1:-0} * 60 ))
+	local now=$(date +"%s")
+
+	if (( $show <= 0)); then
+		echo ",rm restore: showing all results. to show only x minutes, use ,rmr [minutes]"
+	fi
+
+	if ! ls $cs_TRASHDIR/* >/dev/null 2>&1; then
+		echo ",rm restore: no files in trash"
+		return
+	fi
+
 	for f in $cs_TRASHDIR/*; do
 		t=${f##*/}
-		echo -n "[$i] "
-		rms[$i]=$f
-		echo $t | awk -F'-' '{ print $1 "." $2 "." $3 " " $4 ":" $5 ":" $6 }'
 
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			echo "                       - $line"
-		done < "$f"
+		local y=$(echo $t | awk -F'-' '{ print $1 }')
+		local m=$(echo $t | awk -F'-' '{ print $2 }')
+		local d=$(echo $t | awk -F'-' '{ print $3 }')
+		local H=$(echo $t | awk -F'-' '{ print $4 }')
+		local M=$(echo $t | awk -F'-' '{ print $5 }')
+		local S=$(echo $t | awk -F'-' '{ print $6 }')
+		local timestamp=$(date --date="$y-$m-$d $H:$M:$S" +"%s")
+
+		#echo $t | awk -F'-' '{ print $1 "." $2 "." $3 " " $4 ":" $5 ":" $6 }'
+
+		if (( $show <= 0 )) || (( ( $now - $timestamp ) < $show )); then
+			echo -n "[$i] "
+			rms[$i]=$t
+			echo -n "$y.$m.$d $H:$M:$S: "
+
+			local cnt=0
+			while IFS='' read -r line || [[ -n "$line" ]]; do
+				if (( cnt < 3 )); then
+					echo -n "$line "
+				fi
+
+				cnt=$(( cnt + 1 ))
+			done < "$f"
+			if (( cnt > 3 )); then
+				echo -n "and $cnt others"
+			fi
+			echo
+		fi
 
 		i=$(( i + 1 ))
 	done
@@ -148,8 +186,9 @@ csfunc_rm_restore() {
 	while IFS='' read -r line || [[ -n "$line" ]]; do
 		echo ",rm restore: restoring $line"
 		csfunc_trashcli_restore $line
-	done < "${rms[$choice]}"
+	done < "$cs_TRASHDIR/${rms[$choice]}"
 
+	mv $cs_TRASHDIR/{,.restored-}${rms[$choice]}
 }
 alias ,rmr="csfunc_rm_restore"
 alias ,rmrestore="csfunc_rm_restore"

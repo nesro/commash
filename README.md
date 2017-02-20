@@ -17,7 +17,13 @@ With pre and post hooks, it's easy to extend basic functionality. Commash's "not
 
 ![notfound_v0](./miscs/notfound_v0.png)
 
-# bashlex
+# shellcheck hook
+
+Shellcheck is a static analysis tool for shell scripts. Our hook can run it before executing commands and prevent the execution.
+
+![shellcheck_v0](./miscs/shellcheck_v0.png)
+
+# bashlex based debugger
 bashlex is used for parsing the command. so we run only parts
 
 ![debugger_v0](./miscs/debugger_v0.png)
@@ -28,8 +34,16 @@ Commash can alias basics commands (such as rm) and builtins (such as cd) to inte
 - https://www.gnu.org/software/coreutils/coreutils.html
 - http://lingrok.org/xref/coreutils/tests/
 
+# rm safe command
+
+rm wrapper shows you which files are you going to delete and can put them in a trash instead. It also can restore (from the trash) files from a single rm command, even if that command deleted multiple files. rm wrapper uses the freedesktop.org trashcan implementation using trash-cli.
+
+![trash_v0](./miscs/trash_v0.png)
+
 # diploma thesis
 This work is being done as my diploma thesis, here are instructions in the czech language:
+ - czech title: Comma-shell, interaktivní debugger shellu
+ - english title: Comma-shell, an interactive shell debugger
  - Proveďte rešerši existujících nástrojů pro statickou analýzu, krokování a hledání chyb v BASH skriptech.
  - Navrhněte a implementujte nástroj, který umožní psát uživatelské skripty pro analýzu příkazů a ovlivňování jejich spouštění a vykonávání. Nástroj musí umožňovat krokovat složitější skripty po jednotlivých příkazech. Pro analýzu spouštěných skriptů využijte vhodný nástroj z rešeršní části.
  - Vytvořte ukázkové skripty pro zvrácení, či zamezení efektů základních příkazů z GNU coreutils. Zaznamenávejte jejich spouštění a umožněte jimi provedené změny vrátit do původního stavu.
