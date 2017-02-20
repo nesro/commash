@@ -55,7 +55,7 @@ functionality is not supported yet. so we will just execute your command"
 		fi
 
 		if [[ ! -d "$1" ]]; then
-			echo ",: The directory \"$PWD/$1\" doesn't exists. Do you want to create it? [y]es/[n]o"
+			echo ",: The directory \"$1\" doesn't exists. Do you want to create it? [y]es/[n]o"
 			while read -rn1 k; do
 				case $k in
 					y)
