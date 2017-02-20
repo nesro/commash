@@ -191,7 +191,7 @@ csfunc_debug_trap() {
 		cs_debug_trap_rc_ctrlc=0
 
 		# Get last command from history without its number
-		cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
+		cmd=$(csfunc_lasthist)
 
 		# if debug mode is off, run the command
 		if [[ $cs_DEBUG == 0 ]]; then
@@ -219,7 +219,9 @@ csfunc_debug_trap() {
 				# the problematic code is f.ex.:
 				# echo \"
 				# echo a
-				cs_last="$(printf "%q" $cs_last)"
+
+				# TODO XXX: check this again
+				cs_last="$(printf "%q" "$cs_last")"
 
 				eval "
 	set -u

@@ -1,13 +1,83 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
 
+
+
+
+
+
+
+# TODO: this is just a copy-pasta of the bashlex pre-hook. this just allows
+# us to debug the last command instead of starting the debugger for every command
+csfunc_debugger() {
+
+	local cmd=$(csfunc_lasthist 2)
+
+	# debugger is on for only 1 cmd
+	# if [[ $cs_debugger_on != 1 ]]; then
+	# 	return
+	# fi
+
+	echo -e ",: commash debugger:\n"
+
+	local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
+
+	OLDIFS=$IFS
+	IFS=$'\n' lines=($bashlex_out)
+	IFS=$OLDIFS
+
+	>&2 echo -ne "\n,: Select your option or [q]uit or [r]un normally "
+	while :; do
+		read -rn1 key
+
+		echo
+
+		if [[ $key == r ]]; then
+			echo ",: Continuing to run:"
+			echo ",: $cmd"
+
+			# XXX there is no debug trap that could run our code. we need to run
+			# it here. TODO: all the checks from debug trap needs to be here as well
+			eval "$cmd"
+
+			return 0
+		fi
+
+		if [[ $key == q ]]; then
+			echo ",: Nothing is going to be executed."
+			return 1
+		fi
+
+		# we are counting the choices from 1. seems more natural
+		key=$(( key - 1))
+
+		# TODO: check the range, XXX: this is obviously not right
+		if (( $key < 9 )); then
+			echo ",: Executing: \"${lines[$key]}\""
+			eval "${lines[$key]}"
+
+			# do not execute the command after we evaled it
+			return 1
+		fi
+	done
+
+}
+
+
+#-------------------------------------------------------------------------------
+
+# XXX XXX
 # this is the old and dirty version of the debugger.
 # it somehow works, but we don't have much control over what is happening
+# XXX XXX
 
 # Commash debugger library
 
 csfunc_inside_debugger() {
-	cmd=$(HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
+	echo ",: this debugger is obsolete. do not use it."
+	return
+
+	cmd=$(csfunc_lasthist)
 
 	echo ",dbg cmd: \"$cmd\""
 

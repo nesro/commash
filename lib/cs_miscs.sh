@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+
+# wrapper around the history command.
+# the goal of this function is to return last command executed from cmd
+csfunc_lasthist() {
+
+	if [[ -z "$1" ]]; then
+		HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//"
+	else
+		HISTTIMEFORMAT='' history $1 | sed -e "s/^[ ]*[0-9]*[ ]*//" | head -1
+	fi
+}
+
+
 # example usage: csfunc_load_settings a.txt cs_VAR ,
 csfunc_load_settings() {
 	local file="$1"
@@ -7,6 +20,7 @@ csfunc_load_settings() {
 	local spacer="$3"
 	local tmp
 
+	# shellcheck disable=SC2034
 	tmp=$(grep -o '^[^#]*' "$file" | tr -d ' ' | paste -s -d "$spacer")
 	eval "$variable=\$tmp"
 
@@ -42,11 +56,11 @@ csfunc_yesno() {
 }
 
 csfunc_run_cmd_ask() {
-	echo ",: Please confirm runnnig: \"$@\"? [y]es [n]o"
+	echo ",: Please confirm runnnig: \"$*\"? [y]es [n]o"
 	if csfunc_yesno; then
 		eval "$@"
 	else
-		echo ",: command \"$@\" was NOT run"
+		echo ",: command \"$*\" was NOT run"
 	fi
 }
 
@@ -92,7 +106,12 @@ csfunc_levenshtein() {
 		# for j in $(seq 1 $((str2len))); do
 			for (( i=1 ; i <= str1len; i++ )); do
 			# for i in $(seq 1 $((str1len))); do
-				[ "${1:i-1:1}" = "${2:j-1:1}" ] && local cost=0 || local cost=1
+				if [[ "${1:i-1:1}" == "${2:j-1:1}" ]]; then
+					local cost=0
+				else
+					local cost=1
+				fi
+
 				local del=$((d[(i-1)+str1len*j]+1))
 				local ins=$((d[i+str1len*(j-1)]+1))
 				local alt=$((d[(i-1)+str1len*(j-1)]+cost))

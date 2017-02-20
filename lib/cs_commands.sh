@@ -7,6 +7,28 @@
 
 #-------------------------------------------------------------------------------
 
+
+csfunc_help() {
+	cat <<EOF
+Comma-shell (commash) - an interactive shell debugger and helper
+
+1) debugger
+,don - debug every command
+,doff - turn off debugging of every command
+,dnext - debug just the next command
+,d - debug the last command
+
+(i will add more later)
+
+EOF
+
+}
+alias ,h=csfunc_help
+alias ,help=csfunc_help
+
+
+
+# this is a little obsolete now
 cs_usage() {
 	bold=$(tput bold)
 	normal=$(tput sgr0)
@@ -191,7 +213,7 @@ csfunc_xtrace_off() {
 alias ,xoff="csfunc_xtrace_off"
 
 #-------------------------------------------------------------------------------
-
+# debugger commands
 
 csfunc_debugger_on() {
 	cs_debugger_on=1
@@ -204,3 +226,16 @@ csfunc_debugger_off() {
 	echo ",: turning debugger off"
 }
 alias ,doff="csfunc_debugger_off"
+
+csfunc_debugger_next() {
+	cs_debugger_on=1
+	cs_debugger_disable_after=1
+	echo ",: turning debugger on for the next command"
+}
+alias ,dnext="csfunc_debugger_next"
+
+csfunc_debugger_last() {
+	echo "debuggin last"
+	csfunc_debugger
+}
+alias ,d="csfunc_debugger_last"

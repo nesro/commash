@@ -13,6 +13,9 @@ cshook_bashlex_simple_before() {
 	# XXX: is the term debugger right? we are only running parts of the command
 	# now
 	if [[ $cs_debugger_on != 1 ]]; then
+		if [[ $cs_debugger_disable_after == 1 ]]; then
+			cs_debugger_on=0
+		fi
 		return
 	fi
 
