@@ -4,13 +4,13 @@ Comma-shell, an interactive shell debugger
 # installation
 Since this is not a stable release, it's highly recommended to install commash into a virtual machine.
 You can found my Virtualbox setup at the end of this README.
-Install dependencies, clone commash into your home directory and run the main file. The rest will be installed automatically.
+Install dependencies, clone commash into your home directory and run the main file. The rest will be installed automatically. Please note, that building ShellCheck takes a lot of time.
 
     sudo apt update
     sudo apt install git cabal-install python-pip xdotool -y
     sudo pip install bashlex
     git clone https://github.com/nesro/commash ~/.commash
-    bash ~/.commash/comma.sh
+    source ~/.commash/comma.sh
 
 # notfound hook
 With pre and post hooks, it's easy to extend basic functionality. Commash's "notfound handler" is an example that triggers when return code of a command is 127.
