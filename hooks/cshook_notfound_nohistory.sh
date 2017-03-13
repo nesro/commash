@@ -12,6 +12,8 @@
 
 # use "help history" to read about the hisory command
 
+# TODO: look how shopt -o cdspell works
+
 #-------------------------------------------------------------------------------
 
 # instead of using commash hook, you can use command_not_found_handle.

@@ -10,8 +10,8 @@
 # TODO: this is just a copy-pasta of the bashlex pre-hook. this just allows
 # us to debug the last command instead of starting the debugger for every command
 csfunc_debugger() {
-
-	local cmd=$(csfunc_lasthist 2)
+	local cmd
+	cmd=$(csfunc_lasthist 2)
 
 	# debugger is on for only 1 cmd
 	# if [[ $cs_debugger_on != 1 ]]; then

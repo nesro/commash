@@ -85,10 +85,10 @@ alias ,x=",exit"
 
 # enable/disable safe mode
 # TODO: add more levels of safe mode
-cs_SAFE=0
+# cs_SAFE=0
 csfunc_safe() {
 	csfunc_inside=1
-	cs_SAFE=$1
+	# cs_SAFE=$1
 
 	if [[ $1 == 1 ]]; then
 		PATH="$cs_SAFEDIR:$PATH"
@@ -181,9 +181,28 @@ csfunc_welcome() {
 
 # FIXME: add normal paths..
 csfunc_shellcheck_selftest() {
-	~/.cabal/bin/shellcheck -x ~/.commash/comma.sh ~/.commash/lib/cs_*.sh
+
+	# it seems that shellcheck isn't good in resolving paths (f.ex. unused
+	# variables). so we just pre-create a single file
+	# ~/.cabal/bin/shellcheck -x ~/.commash/comma.sh ~/.commash/lib/cs_*.sh
+
+	# this is useless because we want to know in what files are the errors in
+	# ~/.cabal/bin/shellcheck <(cat $(find $cs_ROOTDIR -iname '*.sh' -not -path './tmp/*'))
+
+	local a="$cs_ROOTDIR/tmp/cs_all_in_one.sh"
+	echo "#!/usr/bin/env bash" > $a
+	find $cs_ROOTDIR -iname "*.sh" -not -path "$cs_ROOTDIR/tmp/*" -exec sh -c '
+		echo ",selftest: adding $1 into '$a'"
+		echo "# file: $1" >> '$a'
+		cat $1 >> '$a'
+	' sh {} \;
+	~/.cabal/bin/shellcheck $a
+	echo ",: Look into $a and find the file where the error is."
 }
 alias ,selftest="csfunc_shellcheck_selftest"
+alias ,st="csfunc_shellcheck_selftest"
+
+#-------------------------------------------------------------------------------
 
 csfunc_expect_test() {
 	echo ",: running expect tests from: $cs_ROOTDIR/tests/run.sh"

@@ -16,7 +16,8 @@ csfunc_preprompt() {
 # This function is executed by BASH every time the prompt is about to print.
 # We use cspc_
 csfunc_prompt() {
-	csfunc_rc=$? # This must be the first command. Even before the debug.
+	# this is unused atm. idk if there is a use for this
+	# csfunc_rc=$? # This must be the first command. Even before the debug.
 
   # this is redundat if there was some PROMPT_COMMAND before. but this
   # just simplyfies everything
@@ -235,7 +236,10 @@ csfunc_debug_trap() {
 
 		#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
 
+				# the cs_bash_internals variable is set in the eval block
+				# shellcheck disable=SC2034
 				cs_rc=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $2 }')
+				# shellcheck disable=SC2034
 				cs_last=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $1 }')
 
 				echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> "$CSLOG"

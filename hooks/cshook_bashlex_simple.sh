@@ -7,6 +7,7 @@
 cshook_bashlex_simple_before() {
 	local timestamp="$1"
 	local cmd="$2"
+	local bashlex_out
 
 	# TODO: dont show anything if there is nothing to show?
 
@@ -21,7 +22,7 @@ cshook_bashlex_simple_before() {
 
 	echo -e ",: commash debugger:\n"
 
-	local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
+	bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
 
 	OLDIFS=$IFS
 	IFS=$'\n' lines=($bashlex_out)
@@ -48,7 +49,7 @@ cshook_bashlex_simple_before() {
 		key=$(( key - 1))
 
 		# TODO: check the range, XXX: this is obviously not right
-		if (( $key < 9 )); then
+		if (( key < 9 )); then
 			echo ",: Executing: \"${lines[$key]}\""
 			eval "${lines[$key]}"
 

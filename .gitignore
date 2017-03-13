@@ -4,3 +4,4 @@ __pycache__/
 *.py[cod]
 *$py.class
 trash
+tmp/cs_all_in_one.sh

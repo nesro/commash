@@ -25,7 +25,7 @@ csfunc_cd()  {
 				return
 		fi
 
-		if (( $# == 1 )) && [[ "$1" == $HOME ]]; then
+		if (( $# == 1 )) && [[ "$1" == "$HOME" ]]; then
 			csfunc_tip cdhome "You don't need to specify your home directory. Just \
 run cd without arguments."
 			csfunc_cd_cd
@@ -49,7 +49,7 @@ run cd without arguments."
 			# error
 			echo ",: cd was run with more than argument. this extended \
 functionality is not supported yet. so we will just execute your command"
-			echo ", executing: cd $@"
+			echo ", executing: cd $*"
 			builtin cd "$@"
 			return
 		fi

@@ -41,7 +41,11 @@ csfunc_ps4() {
 	# >&2 printf '(FN %s) ' "${FUNCNAME[@]}"
 }
 
-# LINENO is not working as intended because we run pretty much everything
-# from DEBUG trap.
-#export PS4='$(cs_ps4 "${BASH_SOURCE##*/}:${FUNCNAME[0]}:${LINENO}:${BASH_LINENO[*]}")'
-export PS4='$(csfunc_ps4 "${BASH_SOURCE##*/}" "${FUNCNAME[0]}")'
+csfunc_xtrace_load() {
+	cs_PS4_BACKUP="$PS4"
+
+	# LINENO is not working as intended because we run pretty much everything
+	# from DEBUG trap.
+	#export PS4='$(cs_ps4 "${BASH_SOURCE##*/}:${FUNCNAME[0]}:${LINENO}:${BASH_LINENO[*]}")'
+	PS4='$(csfunc_ps4 "${BASH_SOURCE##*/}" "${FUNCNAME[0]}")'
+}

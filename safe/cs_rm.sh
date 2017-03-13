@@ -16,7 +16,8 @@ cs_TRASHDIR="$cs_ROOTDIR/trash"
 # too
 
 csfunc_trashcli_check() {
-	local trash_restore_path=$(type -p trash-restore)
+	local trash_restore_path
+	trash_restore_path=$(type -p trash-restore)
 	if [[ -z "$trash_restore_path" ]]; then
 		echo ",: trash-cli with trash-restore command not installed, you can install it by runnnig:"
 		echo ",: git clone https://github.com/nesro/trash-cli"
@@ -52,7 +53,7 @@ csfunc_trashcli_restore() {
 		fi
 	fi
 
-	$trash_restore --original-location "$(realpath $1)"
+	$trash_restore --original-location "$(realpath "$1")"
 }
 
 #-------------------------------------------------------------------------------
@@ -97,8 +98,13 @@ alias ,rm=csfunc_rm_cswrapp
 
 #-------------------------------------------------------------------------------
 
+
 csfunc_rm_trash() {
-	local leftovers="$@"
+	local ts trashfile
+
+	# TODO: This will probably mess up with files containing spaces
+	# and or newlines.
+	local leftovers=("$@")
 	if ! csfunc_trashcli_check; then
 		echo ",rm trash: trash-cli not available. No action."
 		return
@@ -106,8 +112,8 @@ csfunc_rm_trash() {
 
 	mkdir -p $cs_TRASHDIR
 
-	local ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
-	local trashfile="$cs_TRASHDIR/$ts"
+	ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
+	trashfile="$cs_TRASHDIR/$ts"
 	if [[ -f $trashfile ]]; then
 		echo ",rm trash: Something went wrong. The file $trashfile already exists."
 		return
@@ -115,13 +121,13 @@ csfunc_rm_trash() {
 
 	#echo ",rm: leftovers=$leftovers"
 
-	for f in $leftovers; do
+	for f in "${leftovers[@]}"; do
 		# echo ",rm trash: trashing file $(realpath $f)"
 		if ! trash-put "$f"; then
 			echo "rm trash: trash-put \"$f\" has failed"
 		fi
 
-		echo "$(realpath $f)" >> $trashfile
+		realpath "$f" >> "$trashfile"
 	done
 
 	echo ",rm trash: done. use ,rmr or ,rmrestore to restore the files. trashfile is $trashfile"
@@ -133,10 +139,11 @@ csfunc_rm_restore() {
 	local i=1
 	declare -a rms
 
-	local show=$(( ${1:-0} * 60 ))
-	local now=$(date +"%s")
+	local ry rm rd rH rM rS timestamp now show
+	now=$(date +"%s")
+	show=$(( ${1:-0} * 60 ))
 
-	if (( $show <= 0)); then
+	if (( show <= 0)); then
 		echo ",rm restore: showing all results. to show only x minutes, use ,rmr [minutes]"
 	fi
 
@@ -148,20 +155,20 @@ csfunc_rm_restore() {
 	for f in $cs_TRASHDIR/*; do
 		t=${f##*/}
 
-		local y=$(echo $t | awk -F'-' '{ print $1 }')
-		local m=$(echo $t | awk -F'-' '{ print $2 }')
-		local d=$(echo $t | awk -F'-' '{ print $3 }')
-		local H=$(echo $t | awk -F'-' '{ print $4 }')
-		local M=$(echo $t | awk -F'-' '{ print $5 }')
-		local S=$(echo $t | awk -F'-' '{ print $6 }')
-		local timestamp=$(date --date="$y-$m-$d $H:$M:$S" +"%s")
+		ry=$(echo "$t" | awk -F'-' '{ print $1 }')
+		rm=$(echo "$t" | awk -F'-' '{ print $2 }')
+		rd=$(echo "$t" | awk -F'-' '{ print $3 }')
+		rH=$(echo "$t" | awk -F'-' '{ print $4 }')
+		rM=$(echo "$t" | awk -F'-' '{ print $5 }')
+		rS=$(echo "$t" | awk -F'-' '{ print $6 }')
+		timestamp=$(date --date="$ry-$rm-$rd $rH:$rM:$rS" +"%s")
 
 		#echo $t | awk -F'-' '{ print $1 "." $2 "." $3 " " $4 ":" $5 ":" $6 }'
 
-		if (( $show <= 0 )) || (( ( $now - $timestamp ) < $show )); then
+		if (( show <= 0 )) || (( ( now - timestamp ) < show )); then
 			echo -n "[$i] "
 			rms[$i]=$t
-			echo -n "$y.$m.$d $H:$M:$S: "
+			echo -n "$ry.$rm.$rd $rH:$rM:$rS: "
 
 			local cnt=0
 			while IFS='' read -r line || [[ -n "$line" ]]; do
@@ -185,10 +192,10 @@ csfunc_rm_restore() {
 
 	while IFS='' read -r line || [[ -n "$line" ]]; do
 		echo ",rm restore: restoring $line"
-		csfunc_trashcli_restore $line
+		csfunc_trashcli_restore "$line"
 	done < "$cs_TRASHDIR/${rms[$choice]}"
 
-	mv $cs_TRASHDIR/{,.restored-}${rms[$choice]}
+	mv "$cs_TRASHDIR"/{,.restored-}"${rms[$choice]}"
 }
 alias ,rmr="csfunc_rm_restore"
 alias ,rmrestore="csfunc_rm_restore"
@@ -197,12 +204,13 @@ alias ,rmrestore="csfunc_rm_restore"
 csfunc_rm_show_to_delete() {
 	declare -A rmarr # count files with the same extension
 	declare -A rmarrorig # save the filename for case there is only one file
+	local rp
 
 	echo ",rm: list of files to remove:"
-	for f in $@; do
-		local rp=$(realpath $f)
+	for f in "$@"; do
+		rp=$(realpath $f)
 
-		if [[ "$rp" == $PWD ]]; then
+		if [[ "$rp" == "$PWD" ]]; then
 			echo ",rm: you want to delete \"$f\" which is your current directory!"
 			continue
 		fi
@@ -258,14 +266,14 @@ csfunc_rm_cswrapp()  {
 #-------------------------------------------------------------------------------
 
 	# options
-	local opt_d=0	# removedir
-	local opt_r=0 # recursive
-	local opt_f=0 # force
+	# local opt_d=0	# removedir
+	# local opt_r=0 # recursive
+	# local opt_f=0 # force
 	local opt_i_always=0 # interactive
 	local opt_i_sometimes=0
-	local opt_i_never=0
+	# local opt_i_never=0
 
-	local save_opts="$@"
+	local save_opts=("$@")
 
 #-------------------------------------------------------------------------------
 	OPTIND=1
@@ -276,7 +284,7 @@ csfunc_rm_cswrapp()  {
 	        -)
 	            case "$OPTARG" in
 	                loglevel)
-	                    val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+	                    val="${!OPTIND}"; OPTIND=$(( OPTIND + 1 ))
 	                    echo "Parsing option: '--${OPTARG}', value: '${val}'" >&2;
 	                    ;;
 	                loglevel=*)
@@ -291,7 +299,8 @@ csfunc_rm_cswrapp()  {
 	                    ;;
 	            esac;;
 	        d)
-	            removedir=1
+						echo ",rm: todo removedir"
+	            # removedir=1
 	            ;;
 					f)
 						echo "force"
@@ -334,7 +343,7 @@ csfunc_rm_cswrapp()  {
 			echo ",rm: the -I option don't take effect since you're going to remove less than three files"
 		else
 			echo ",rm: we will not stand in the way if you want to try the -I option"
-			csfunc_run_cmd_ask /bin/rm $save_opts
+			csfunc_run_cmd_ask /bin/rm "${save_opts[@]}"
 			return
 		fi
 	fi
@@ -342,12 +351,15 @@ csfunc_rm_cswrapp()  {
 	# handle the -i option
 	if [[ $opt_i_always == 1 ]]; then
 		echo ",rm: we will not stand in the way if you want to try the -i option"
-		csfunc_run_cmd_ask /bin/rm $save_opts
+		csfunc_run_cmd_ask /bin/rm "${save_opts[@]}"
 		return
 	fi
 
 	# these should be only the files we want to remove. i.e. no flags like -fr
-	local leftovers="$@"
+	# local leftovers="$*"
+	# XXX test me pls
+	local leftovers=("$@")
+
 	# echo ",rm leftovers: $@"
 
 #-------------------------------------------------------------------------------
@@ -355,7 +367,7 @@ csfunc_rm_cswrapp()  {
 # want to remove
 
 	# TODO I don't care about symlinks yet.
-	csfunc_rm_show_to_delete "$leftovers"
+	csfunc_rm_show_to_delete "${leftovers[@]}"
 
 #-------------------------------------------------------------------------------
 # prompt user about the action
@@ -368,8 +380,8 @@ set +e
 		echo
 		case "$k" in
 		r)
-			echo ",rm: /bin/rm $save_opts"
-			/bin/rm $save_opts
+			echo ",rm: /bin/rm ${save_opts[*]}"
+			/bin/rm "${save_opts[@]}"
 			cs_extern_rc=$?
 
 			# notify user about the error if there is any
@@ -382,7 +394,7 @@ set +e
 			return 0
 			;;
 		t)
-			csfunc_rm_trash $leftovers
+			csfunc_rm_trash "${leftovers[@]}"
 			break
 			;;
 		*)
