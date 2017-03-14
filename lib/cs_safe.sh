@@ -4,11 +4,14 @@
 # Commash safe-commands library
 
 #-------------------------------------------------------------------------------
-# save paths to commands so we can use them even in the safe mode
-cs_RM=$(which rm)
-cs_TOUCH=$(which touch)
-cs_SED=$(which sed)
-cs_TAIL=$(which tail)
+
+
+# was: save paths to commands so we can use them even in the safe mode
+# we don't need to save paths, because we're going to use aliases
+# cs_RM=$(which rm)
+# cs_TOUCH=$(which touch)
+# cs_SED=$(which sed)
+# cs_TAIL=$(which tail)
 
 cs_SAFE_COMMANDS="cd rm"
 

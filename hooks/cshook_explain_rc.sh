@@ -41,13 +41,13 @@ csfunc_rc() {
 	if (( rc == 127 )) && [[ -n "$cs_HOOK_NOTFOUND_ACTIVE" ]]; then
 		return
 	fi
-	
-	echo ",: return code warning: \$? == $rc $(cs_explain_rc $rc)"
+
+	echo ",: return code warning: \$? == $rc $(cs_explain_rc "$rc")"
 }
 
 cshook_explain_rc_after() {
 	if (( cs_rc > 0 )); then
-		csfunc_rc $cs_rc
+		csfunc_rc "$cs_rc"
 	fi
 }
 

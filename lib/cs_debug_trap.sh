@@ -237,7 +237,7 @@ csfunc_debug_trap() {
 		#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
 
 				# the cs_bash_internals variable is set in the eval block
-				# shellcheck disable=SC2034
+				# shellcheck disable=SC2154
 				cs_rc=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $2 }')
 				# shellcheck disable=SC2034
 				cs_last=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $1 }')

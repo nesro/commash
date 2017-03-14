@@ -10,7 +10,7 @@
 # TODO: this is just a copy-pasta of the bashlex pre-hook. this just allows
 # us to debug the last command instead of starting the debugger for every command
 csfunc_debugger() {
-	local cmd
+	local cmd bashlex_out
 	cmd=$(csfunc_lasthist 2)
 
 	# debugger is on for only 1 cmd
@@ -20,7 +20,7 @@ csfunc_debugger() {
 
 	echo -e ",: commash debugger:\n"
 
-	local bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
+	bashlex_out=$(~/.commash/debugger/cs_bashlex.py "$cmd")
 
 	OLDIFS=$IFS
 	IFS=$'\n' lines=($bashlex_out)
@@ -52,7 +52,7 @@ csfunc_debugger() {
 		key=$(( key - 1))
 
 		# TODO: check the range, XXX: this is obviously not right
-		if (( $key < 9 )); then
+		if (( key < 9 )); then
 			echo ",: Executing: \"${lines[$key]}\""
 			eval "${lines[$key]}"
 

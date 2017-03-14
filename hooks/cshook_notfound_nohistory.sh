@@ -55,6 +55,7 @@ alias ,n="csfunc_nofound_nohistory_revert"
 
 csfunc_remove_from_history() {
 	local cmd="$1"
+	local lastcmd
 
 	# we don't need to remove commands from this file, because we will
 	# delete the files even before the history is written there
@@ -63,16 +64,16 @@ csfunc_remove_from_history() {
 	# if the user makes f.ex. history -w or -a after every command, this hook
 	# will not work
 
-	local lastcmd=$(history | tail -1)
+	lastcmd=$(history | tail -1)
 
 	if [[ ! $lastcmd =~ $cmd ]]; then
 		echo ",notfound_nohistory: something went wrong. lastcmd !=~ cmd."
 		return
 	fi
 
-	cs_NOTFOUND_NOHISTORY_LASTCMD="$(echo $lastcmd | awk '{ $1=""; print $0 }')"
+	cs_NOTFOUND_NOHISTORY_LASTCMD="$(echo "$lastcmd" | awk '{ $1=""; print $0 }')"
 	echo ",notfound_nohistory: removing notfound command:$cs_NOTFOUND_NOHISTORY_LASTCMD"
-	history -d $(echo $lastcmd | awk '{ print $1 }')
+	history -d "$(echo "$lastcmd" | awk '{ print $1 }')"
 
 	echo ",notfound_nohistory: run ,notfound (or ,n) to inject the command back to history"
 }
@@ -85,16 +86,19 @@ cshook_nofound_nohistory_after() {
 
 		echo ",notfound: Command not found."
 
-		local cmdcmd="$(echo $cmd | awk '{ print $1 }')"
+		local cmdcmd
 		# counter of suggestions
 		local cmdcnt=1
 		declare -a cmds
 		local choice=1
 		local anyhint=0
+		local newcmd
+
+		cmdcmd="$(echo "$cmd" | awk '{ print $1 }')"
 
 		for i in $cs_NOTFOUND_NOHISTORY_FIXLIST; do
 			if (( $(csfunc_levenshtein "$i" "$cmdcmd") == 1 )); then
-				local newcmd="$i$(echo $cmd | awk '{ $1=""; print $0 }')"
+				newcmd="$i$(echo "$cmd" | awk '{ $1=""; print $0 }')"
 				echo ",notfound: [$cmdcnt] choose: \"$newcmd\""
 				cmds[$cmdcnt]="$newcmd"
 				cmdcnt=$(( cmdcnt + 1 ))

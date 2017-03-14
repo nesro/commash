@@ -8,7 +8,7 @@ csfunc_lasthist() {
 	if [[ -z "$1" ]]; then
 		HISTTIMEFORMAT='' history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//"
 	else
-		HISTTIMEFORMAT='' history $1 | sed -e "s/^[ ]*[0-9]*[ ]*//" | head -1
+		HISTTIMEFORMAT='' history "$1" | sed -e "s/^[ ]*[0-9]*[ ]*//" | head -1
 	fi
 }
 
