@@ -23,9 +23,7 @@ csfunc_lib_safe_load() {
 
 	for a in $cs_SAFE_COMMANDS; do
 		if [[ -f $cs_ROOTDIR/safe/cs_$a.sh ]]; then
-
-			# shellcheck source=~/.commash/safe/cs_cd.sh
-			# shellcheck source=~/.commash/safe/cs_rm.sh
+			# shellcheck source=/dev/null
 			source "$cs_ROOTDIR/safe/cs_$a.sh"
 			eval "alias \$a=\"csfunc_\$a\""
 		else

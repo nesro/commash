@@ -182,6 +182,9 @@ csfunc_welcome() {
 # FIXME: add normal paths..
 csfunc_shellcheck_selftest() {
 
+	csfunc_var cs_ROOTDIR
+	csfunc_var cs_SHELLCHECK
+
 	# it seems that shellcheck isn't good in resolving paths (f.ex. unused
 	# variables). so we just pre-create a single file
 	# ~/.cabal/bin/shellcheck -x ~/.commash/comma.sh ~/.commash/lib/cs_*.sh
@@ -196,8 +199,12 @@ csfunc_shellcheck_selftest() {
 		echo "# file: $1" >> '$a'
 		cat $1 >> '$a'
 	' sh {} \;
-	~/.cabal/bin/shellcheck $a
-	echo ",: Look into $a and find the file where the error is."
+	if ~/.cabal/bin/shellcheck $a; then
+		echo ",selftest: All good. :)"
+	else
+		echo ",selftest: ShellCheck found some issues. Look into $a and find the "
+		 "file where the error is. Or just search through all project."
+	fi
 }
 alias ,selftest="csfunc_shellcheck_selftest"
 alias ,st="csfunc_shellcheck_selftest"

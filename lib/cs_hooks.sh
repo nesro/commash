@@ -103,7 +103,7 @@ csfunc_lib_hooks_load() {
 	cspc_command_cnt=0
 
 	for hookfile in $cs_HOOKS_DIR/cshook_*.sh; do
-		# shellcheck source=/home/n/.commash/hooks/hooks/cshook_bashlex_simple.sh
+		# shellcheck source=/dev/null
 		source "$hookfile"
 	done
 }

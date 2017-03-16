@@ -151,14 +151,26 @@ csfunc_pretype() {
 
 
 
+# http://wiki.bash-hackers.org/commands/builtin/caller
+csfunc_caller_frame() {
+  local frame=0
+  while caller $frame; do
+    ((frame++))
+  done
+}
 
-
-
-
-
-
-
-
-
+# Check if the var is set. If not. It's bad.
+# $1 == name of the variable
+csfunc_var() {
+	local var
+	eval "var=\${!1}"
+	if [[ -z "$var" ]]; then
+		echo ",fatal error: variable $1 is empty, but it shouldn't be."
+		# echo ",callback:"
+		# csfunc_caller_frame
+		echo ",: entering infinite loop"
+		while :; do sleep 1; done
+	fi
+}
 
 # EOF
