@@ -55,6 +55,10 @@ csfunc_yesno() {
 	done
 }
 
+csfunc_anykey() {
+	read -n 1 -s
+}
+
 csfunc_run_cmd_ask() {
 	echo ",: Please confirm runnnig: \"$*\"? [y]es [n]o"
 	if csfunc_yesno; then

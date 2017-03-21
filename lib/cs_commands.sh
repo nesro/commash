@@ -265,3 +265,41 @@ csfunc_debugger_last() {
 	csfunc_debugger
 }
 alias ,d="csfunc_debugger_last"
+
+#-------------------------------------------------------------------------------
+
+# Commash wrapper for screen recording and saving it as a gif
+#
+# until https://github.com/icholy/ttygif/ gets better CLI options
+# we want to have a nice wrapper
+csfunc_ttyrec() {
+	if ! type ttyrec >/dev/null 2>&1; then
+		echo ",ttyrec: ttyrec is not installed, you can install it by typing:" \
+			" sudo apt install ttyrec"
+		return
+	fi
+
+	if ! type ttygif >/dev/null 2>&1; then
+		echo ",ttyrec: ttygif is not installed, you can install it from: " \
+			"https://github.com/marcioAlmada/ttygif"
+	fi
+
+	echo ",ttyrec: Commash wrapper for ttyrec and ttygif. Press any key to " \
+		"start a new shell. Exit with Ctrl-D and then wait to animation to finish."
+	csfunc_anykey
+
+	if ! ttyrec /tmp/rec; then
+		echo ",ttyrec: ttyrec /tmp/rec failed"
+		return
+	fi
+	if ! ttygif /tmp/rec; then
+		echo ",ttyrec: ttygif /tmp/rec failed"
+		return
+	fi
+
+	if [[ -n $1 ]]; then
+		echo ",ttyrec: Moving tty.gif to $1"
+		mv tty.gif $1
+	fi
+}
+alias ,ttyrec="csfunc_ttyrec"
