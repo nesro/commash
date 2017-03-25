@@ -38,7 +38,7 @@ Commash can alias basics commands (such as rm) and builtins (such as cd) to inte
 
 rm wrapper shows you which files are you going to delete and can put them in a trash instead. It also can restore (from the trash) files from a single rm command, even if that command deleted multiple files. rm wrapper uses the freedesktop.org trashcan implementation using trash-cli.
 
-![trash_v0](./miscs/rm_v0.png)
+![trash_v0](./miscs/rm_v1.png)
 
 # diploma thesis
 This work is being done as my diploma thesis, here are instructions in the czech language:
