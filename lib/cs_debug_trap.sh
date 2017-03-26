@@ -85,6 +85,9 @@ csfunc_debug_trap() {
 			csfunc_rc $cs_debug_trap_rc
 		fi
 
+		# XXX: this is a fix for not executing the first command after ctrl-c
+		csfunc_catch_command=1
+
 		# XXX lock
 		# csfunc_unlock
 		csfunc_inside=0
