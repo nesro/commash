@@ -10,14 +10,13 @@ cshook_bashlex_simple_before() {
 	local bashlex_out
 
 	# TODO: dont show anything if there is nothing to show?
+	# XXX: this is still a problem ^
 
-	# XXX: is the term debugger right? we are only running parts of the command
-	# now
 	if [[ $cs_debugger_on != 1 ]]; then
-		if [[ $cs_debugger_disable_after == 1 ]]; then
-			cs_debugger_on=0
-		fi
 		return
+	fi
+	if [[ $cs_debugger_disable_after == 1 ]]; then
+		cs_debugger_on=0
 	fi
 
 	echo -e ",: commash debugger:\n"
