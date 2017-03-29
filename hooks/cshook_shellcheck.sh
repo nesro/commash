@@ -63,7 +63,7 @@ cshook_shellcheck_before() {
 
 			if [[ $key == p ]]; then
 				echo
-				csfunc_pretype "$cmd"
+				( csfunc_pretype "$cmd" & ) >/dev/null 2>&1
 				return 1
 			fi
 

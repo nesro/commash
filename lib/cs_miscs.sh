@@ -146,6 +146,10 @@ csfunc_levenshtein() {
 
 # I bet this is not the best way how pre-type a command. but it works :)
 # TODO: find a real way how to do it
+
+# XXX:
+# use this:
+# ( csfunc_pretype "..." & ) >/dev/null 2>&1
 csfunc_pretype() {
 	# sleep is needed for giving bash time to show next prompt
 	# both commands needs to be run on background bash can show next prompt

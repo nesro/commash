@@ -27,15 +27,13 @@ cshook_bashlex_simple_before() {
 	IFS=$'\n' lines=($bashlex_out)
 	IFS=$OLDIFS
 
-	>&2 echo -ne "\n,: Select your option or [q]uit or [r]un normally "
+	>&2 echo -ne "\n,: Select your option, [0] debug whole cmd, [q]uit, [r]un normally "
 	while :; do
 		read -rn1 key
-
 		echo
 
 		if [[ $key == r ]]; then
-			echo ",: Continuing to run:"
-			echo ",: $cmd"
+			echo ",: Continuing to run: \"$cmd\""
 			return 0
 		fi
 
@@ -49,8 +47,49 @@ cshook_bashlex_simple_before() {
 
 		# TODO: check the range, XXX: this is obviously not right
 		if (( key < 9 )); then
-			echo ",: Executing: \"${lines[$key]}\""
-			eval "${lines[$key]}"
+
+			if (( key == -1 )); then
+				echo ",: Executing: \"$cmd\""
+				eval "$cmd"
+			else
+				echo ",: Executing: \"${lines[$key]}\""
+				eval "${lines[$key]}"
+			fi
+
+			#
+			echo
+			echo ",: What now? [q]uit, [p]retype and debug just the next command"
+			while read -rsn1 n; do
+				case "$n" in
+					q)
+						break
+						;;
+					p)
+						cs_debugger_on=1
+						cs_debugger_disable_after=1
+
+						echo
+
+						# we need to make things async (&) to be sure the prompt is written
+						# before the pretyped text
+						( csfunc_pretype "$cmd" & ) >/dev/null 2>&1
+						return 1
+
+						# cs_pretype_and_exit=1
+						# break
+						;;
+					*)
+						echo "[q]uit or [p]retype"
+						;;
+				esac
+			done
+
+
+			# # XXX: bash is slow?
+			# if [[ $cs_pretype_and_exit == 1 ]]; then
+			# 	csfunc_pretype "$cmd" &
+			# 	return 1
+			# fi
 
 			# do not execute the command after we evaled it
 			return 1
