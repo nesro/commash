@@ -299,7 +299,7 @@ csfunc_ttyrec() {
 
 	if [[ -n $1 ]]; then
 		echo ",ttyrec: Moving tty.gif to $1"
-		mv tty.gif $1
+		mv tty.gif "$1"
 	fi
 }
 alias ,ttyrec="csfunc_ttyrec"

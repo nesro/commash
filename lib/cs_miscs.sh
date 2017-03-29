@@ -56,7 +56,7 @@ csfunc_yesno() {
 }
 
 csfunc_anykey() {
-	read -n 1 -s
+	read -r -n 1 -s
 }
 
 csfunc_run_cmd_ask() {

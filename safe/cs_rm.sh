@@ -168,7 +168,7 @@ csfunc_rm_trash_files() {
 	#echo ",rm: leftovers=$leftovers"
 
 	for f in "${leftovers[@]}"; do
-		echo ",rm trash: trashing file $(realpath $f)" # XXX XXX
+		echo ",rm trash: trashing file $(realpath "$f")" # XXX XXX
 		if ! trash-put "$f"; then
 			echo "rm trash: trash-put \"$f\" has failed"
 		fi
