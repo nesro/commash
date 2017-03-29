@@ -50,13 +50,20 @@ cshook_shellcheck_before() {
 	if (( sc_rc > 0 )); then
 		>&2 echo -e ",: ShellCheck: \n$sc_out"
 
-		>&2 echo -n ",: Now what? [r]un, [s]top, [i]gnore: "
+		>&2 echo -n ",: Now what? [r]un, [s]top, [i]gnore, [p]retype: "
 		while :; do
 			read -rn1 key
+			# TODO: case instead of ifs
 
 			if [[ $key == r ]]; then
 				>&2 echo -e "\n,: Running this command: \"$cmd\""
 				return 0
+			fi
+
+			if [[ $key == p ]]; then
+				echo
+				csfunc_pretype "$cmd"
+				return 1
 			fi
 
 			if [[ $key == s ]]; then
