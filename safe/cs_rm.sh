@@ -527,37 +527,43 @@ csfunc_rm_cswrapp()  {
 
 	# TODO: [c]ompress into trash?
 	# echo ",rm: [r]emove, [q]uit, move to [t]rash"
+	while :; do
+		echo ",rm: Choose:"
+		echo ",rm:    [r]emove files"
+		echo ",rm:    [q]uit"
+		echo ",rm:    [t]rash files"
+		echo ",rm:    [s]how all files"
+		#echo ",rm:    [d]elayed removal"
 
-	echo ",rm: Choose:"
-	echo ",rm:    [r]emove files"
-	echo ",rm:    [q]uit"
-	echo ",rm:    [t]rash files"
-	#echo ",rm:    [d]elayed removal"
+		# echo ",rm: rm $save_opts"
+		while read -rn1 k; do
+			echo
+			case "$k" in
+			r)
+				echo ",rm: /bin/rm ${save_opts[*]}"
+				/bin/rm "${save_opts[@]}"
+				cs_extern_rc=$?
 
-	# echo ",rm: rm $save_opts"
-	while read -rn1 k; do
-		echo
-		case "$k" in
-		r)
-			echo ",rm: /bin/rm ${save_opts[*]}"
-			/bin/rm "${save_opts[@]}"
-			cs_extern_rc=$?
+				# notify user about the error if there is any
+				csfunc_safe_hooks_after
 
-			# notify user about the error if there is any
-			csfunc_safe_hooks_after
-
-			return
-			;;
-		q)
-			return
-			;;
-		t)
-			csfunc_rm_trash_files "${leftovers[@]}"
-			break
-			;;
-		*)
-			echo ",rm: press [r]un, [t]rash, or [q]uit"
-			;;
-		esac
+				return
+				;;
+			q)
+				return
+				;;
+			t)
+				csfunc_rm_trash_files "${leftovers[@]}"
+				return
+				;;
+			s)
+				echo ",rm: all files: ${leftovers[@]}"
+				break
+				;;
+			*)
+				echo ",rm: press [r]un, [t]rash, or [q]uit"
+				;;
+			esac
+		done
 	done
 }
