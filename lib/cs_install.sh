@@ -24,8 +24,10 @@ csfunc_install_xdotools() {
 }
 
 csfunc_install_shellcheck() {
+	csfunc_var cs_SHELLCHECK
+
 	#TODO: include some general shellcheck file that have the path as a variable
-	if [[ ! -x ~/.cabal/bin/shellcheck ]]; then
+	if [[ ! -x $cs_SHELLCHECK ]]; then
 		echo ",install: installing ShellCheck"
 
 		echo ",install: running command: \"cabal update\""

@@ -5,7 +5,6 @@
 
 # ShellCheck
 # sc_check=1 # check every command with ShellCheck before executing
-sc_path=~/.cabal/bin/shellcheck
 sc_debug=0
 
 cssc_disable_list_file="$cs_ROOTDIR/settings/cs_shellcheck_blacklist.txt"
@@ -31,6 +30,8 @@ cshook_shellcheck_install() {
 cshook_shellcheck_before() {
 	[[ $sc_debug == 1 ]] && set -xv
 
+	csfunc_var cs_SHELLCHECK
+
 	# ShellCheck needs to get a script. So we create one with shebang,
 	# variables and the actual command
 	#sc_out=$($sc_path <(echo '#!/bin/bash'; echo "$(set -o posix ; set)"; echo "$cmd") 2>&1)
@@ -41,7 +42,7 @@ cshook_shellcheck_before() {
 		csfunc_dbg_echo ", cssc: loading disable list end"
 	fi
 
-	sc_out=$($sc_path <(echo -e "#!/bin/bash\n# shellcheck disable=$cssc_disable\n$cmd") 2>&1)
+	sc_out=$($cs_SHELLCHECK <(echo -e "#!/bin/bash\n# shellcheck disable=$cssc_disable\n$cmd") 2>&1)
 	sc_rc=$?
 	sc_out=$(echo "$sc_out" | tail -n +3)
 
