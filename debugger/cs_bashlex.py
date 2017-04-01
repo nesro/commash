@@ -106,6 +106,34 @@ class pipenodevisitor(ast.nodevisitor):
 		print('echo "' + cmd[n.pos[0]:n.pos[1]] + '"')
 		menucnt += 1
 
+	# ,dnext
+	# for i in a b; do echo $i; done
+	# ^-----------
+	# TODO:
+	# - be able to iterate to items that produces the for header
+	# - be able run the for body with arbitrary iterators
+	# - be able to step through individual cycles
+	def visitfor(self, n, parts):
+		global menucnt
+		spaces = ' ' * (n.pos[0])
+		# : '+ cmd[n.pos[0]:n.pos[1]]
+		print(spaces + '^-- [' + str(menucnt) + '] for head', file=sys.stderr)
+		for part in parts:
+			if part.kind is 'list':
+				spaces = ' ' * (part.pos[0])
+				print(spaces + '^-- [' + str(menucnt) + '] for body: ' + cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
+				#print(part, file=sys.stderr)
+				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
+
+
+	# XXX: I think we don't need nested fors and whiles atm
+	# def visitnodeend(self, node):
+	# 	print(self, file=sys.stderr)
+	# 	print(node, file=sys.stderr)
+	# 	# print('(nodeend)', file=sys.stderr);
+	# 	spaces = ' ' * 3#(n.pos[0])
+	# 	if node.kind is 'for':
+	# 		print(spaces + '|-for', file=sys.stderr);
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
