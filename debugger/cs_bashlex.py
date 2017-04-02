@@ -115,13 +115,44 @@ class pipenodevisitor(ast.nodevisitor):
 	# - be able to step through individual cycles
 	def visitfor(self, n, parts):
 		global menucnt
-		spaces = ' ' * (n.pos[0])
+		iterator=None
+		header_from=0
+		header_to=0
+		header=None
+		for_body=None
+
+		#spaces = ' ' * (n.pos[0])
 		# : '+ cmd[n.pos[0]:n.pos[1]]
-		print(spaces + '^-- [' + str(menucnt) + '] for head', file=sys.stderr)
+		#print(spaces + '^-- [' + str(menucnt) + '] for head', file=sys.stderr)
+
 		for part in parts:
+
+			# find the string representing the iterator
+			if part.kind is 'word' and iterator is None:
+				spaces = ' ' * (part.pos[0])
+				iterator=part.word
+				print(spaces + '^-- [' + str(menucnt) + '] show values of iterator: ' + iterator, file=sys.stderr)
+				menucnt += 1
+
+			# find the string representing the list of things we want to iterate
+			# for now, I will just cut things between "in" and ";"
+			if part.kind is 'reservedword' and part.word == 'in':
+				header_from=part.pos[0]+3 # 3 == 'in '
+				#print(' ' * header_from + '^-- [' + str(menucnt) + '] iterate', file=sys.stderr)
+
+			if part.kind is 'reservedword' and part.word == ';':
+				header_to=part.pos[0]
+				header=cmd[header_from:header_to]
+				assert iterator != 'csit'
+				print('csit=0;for '+iterator+' in ' + header + '; do (( csit++ )); echo "( $csit ) '+iterator+' = $'+iterator+'"; done')
+
 			if part.kind is 'list':
 				spaces = ' ' * (part.pos[0])
-				print(spaces + '^-- [' + str(menucnt) + '] for body: ' + cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
+				for_body=cmd[part.pos[0]:part.pos[1]]
+				print(spaces + '^-- [' + str(menucnt) + '] run with custom iterator: ' + for_body,
+					file=sys.stderr)
+				print('read -p "set iterator \\"'+iterator+'\\" value: " '+iterator+'; '+for_body)
+				menucnt += 1
 				#print(part, file=sys.stderr)
 				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
 
@@ -142,6 +173,7 @@ if __name__ == '__main__':
 
 	parsed = parser.parse(cmd)
 
+	# show whole AST
 	if False:
 		print("\n<bashlex ast dump>", file=sys.stderr)
 		for p in parsed:

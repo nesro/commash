@@ -16,6 +16,7 @@ cshook_bashlex_simple_before() {
 		return
 	fi
 	if [[ $cs_debugger_disable_after == 1 ]]; then
+		cs_debugger_disable_after=0
 		cs_debugger_on=0
 	fi
 

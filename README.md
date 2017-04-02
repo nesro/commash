@@ -28,6 +28,10 @@ bashlex is used for parsing the command. so we run only parts
 
 ![debugger_v0](./miscs/debugger_v0.png)
 
+Example of debugging a for cycle. You can see a whole list of items that the loop will iterate, or you can run the body of the for with custom iterator value.
+
+![dbg_for_v0](./miscs/dbg_for_v0.png)
+
 # safe commands
 Commash can alias basics commands (such as rm) and builtins (such as cd) to internal functions written in bash. It can provide more verbose information, tips and it allows easily to revert the command you run (such as restore deleted file).
 
