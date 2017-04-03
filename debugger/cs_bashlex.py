@@ -157,6 +157,28 @@ class pipenodevisitor(ast.nodevisitor):
 				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
 
 
+	def visitwhile(self, n, parts):
+		global menucnt
+		while_header=None
+		while_body=None
+		for part in parts:
+			if part.kind is 'list' and while_header is None:
+				spaces = ' ' * (part.pos[0])
+				while_header=cmd[part.pos[0]:part.pos[1]]
+				print(spaces + '^-- [' + str(menucnt) + '] while header: ' + while_header,
+					file=sys.stderr)
+				print(while_header)
+				menucnt += 1
+				continue
+			if part.kind is 'list' and while_body is None:
+				spaces = ' ' * (part.pos[0])
+				while_body=cmd[part.pos[0]:part.pos[1]]
+				print(spaces + '^-- [' + str(menucnt) + '] while body: ' + while_body,
+					file=sys.stderr)
+				print(while_body)
+				menucnt += 1
+				continue
+
 	# XXX: I think we don't need nested fors and whiles atm
 	# def visitnodeend(self, node):
 	# 	print(self, file=sys.stderr)
