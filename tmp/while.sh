@@ -8,7 +8,7 @@ I think I've found a bug in bash.
 I'm working on a project that skips** all commands that are going to be
 executed. I achieved this by a combination of a debug trap and extdebug. Once,
 for the entire list of commands to be executed, I'm going to execute it via eval
-from the debug trap. It works suprisingly well and it opens a possibility of
+from the debug trap. It works surprisingly well and it opens a possibility of
 really cool things.
 
 **Excerpt from man bash extdebug: "If the command run by the DEBUG trap returns
@@ -29,7 +29,7 @@ set -x
 
 
 # set up the debug trap with extdebug so that every command is not executed
-# (be sure to close and reopen the shell, because trying to set it differnetly
+# (be sure to close and reopen the shell, because trying to set it differently
 # will not work)
 t() { return 1; }
 trap t DEBUG
@@ -37,7 +37,7 @@ shopt -s extdebug
 
 
 # run an empty for cycle. we can see from the output that bash ran :, then
-# false and stopped to it. which is the right behaviour
+# false and stopped to it. which is the right behavior
 for (( :; false; )); do :; done
 
 
