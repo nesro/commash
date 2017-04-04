@@ -157,6 +157,9 @@ class pipenodevisitor(ast.nodevisitor):
 				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
 
 
+	# XXX: this code works fine, but there is a major problem with running
+	# while at all in commash. I think it's just a bug in bash (since for cycle
+	# works good. I'm afraid there is nothing I can do about it quickly
 	def visitwhile(self, n, parts):
 		global menucnt
 		while_header=None

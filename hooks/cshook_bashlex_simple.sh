@@ -54,8 +54,7 @@ cshook_bashlex_simple_before() {
 				eval "$cmd"
 			else
 				echo ",: Executing: \"${lines[$key]}\""
-				echo "XXX"
-				#eval "${lines[$key]}"
+				eval "${lines[$key]}"
 			fi
 
 			#
