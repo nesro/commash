@@ -70,48 +70,24 @@ csfunc_restore_internals() {
 # XXX TODO FIXME
 
 csfunc_while_false_guard() {
-
-	if [[ $BASH_COMMAND =~ ^csfunc_ ]] || [[ $csfunc_inside == 1 ]]; then
-		# echo ",while_guard: 0 (csfunc or inside)"
+	if [[ $while_before_eval == 1 ]]; then
+		#echo ",while_guard: we are in eval. false_guard returns 0"
 		return 0
-	fi
-
-	if (( csfunc_catch_command == 1 )); then
-		# echo ",while_guard: 1"
+	else
+		#echo ",while_guard: we are not in eval. false_guard returns 1"
 		return 1
 	fi
-
-	# echo ",while_guard: 0"
-	return 0
 }
 
 # see alias "while" in cs_load.sh
-csfunc_while() {
-	cs_the_while=1
-}
+# csfunc_while() {
+# 	cs_the_while=1
+# }
 
 #-------------------------------------------------------------------------------
 
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
-
-	# ethical fix for a problem. see csfunc_while
-	if [[ $cs_the_while == 1 ]]; then
-		cs_the_while=0
-
-		if [[ $BASH_COMMAND != csfunc_prompt ]]; then
-			# echo ",while: fixing while loop in debug trap. bc=$BASH_COMMAND"
-
-			csfunc_run_command_with_hooks "$(csfunc_lasthist)"
-
-			return 0
-		else
-			#echo ",while: was csfunc_prompt"
-			:
-		fi
-	fi
-
-	#echo ",debug trap. bc=$BASH_COMMAND lasthist=$(csfunc_lasthist) catch=$csfunc_catch_command"
 
 	# we set up -u before executing the command in eval. if we ctrl-c the command
 	# the -u flag is not unset and can cause problems
@@ -302,6 +278,8 @@ csfunc_run_command_with_hooks() {
 			# TODO XXX: check this again
 			cs_last="$(printf "%q" "$cs_last")"
 
+while_before_eval=1
+
 			eval "
 set -u
 csfunc_restore_internals $cs_rc \"$cs_last\"
@@ -311,6 +289,8 @@ $cmd
 cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
 set +u
 			"
+
+while_before_eval=0
 
 	#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
 

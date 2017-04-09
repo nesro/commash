@@ -33,7 +33,7 @@ csfunc_main() {
 	csfunc_welcome
 
 	# see: csfunc_while
-	alias while="csfunc_while; while csfunc_while_false_guard && "
+	alias while=":; while csfunc_while_false_guard && "
 
 	return 0
 }
