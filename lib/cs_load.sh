@@ -32,6 +32,9 @@ csfunc_main() {
 
 	csfunc_welcome
 
+	# see: csfunc_while
+	alias while="csfunc_while; while csfunc_while_false_guard && "
+
 	return 0
 }
 
@@ -63,6 +66,9 @@ csfunc_unload() {
 
 		unset "$v"
 	done
+
+	# see: csfunc_while
+	unalias while
 }
 
 csfunc_reload() {

@@ -50,13 +50,68 @@ csfunc_prompt() {
 # a command. It's second argument, which will not be used will be treated
 # as the $_ variable.
 csfunc_restore_internals() {
+	if [[ -z "$1" ]]; then
+			echo ",csfunc_restore_internals: empty"
+	fi
+
 	return "$1"
+}
+
+#-------------------------------------------------------------------------------
+# XXX TODO FIXME
+# The problem AFAIK:
+# if we skip every command with debug trap + extdebug, the command:
+# while XXX; do YYY; done
+# will run forever, because XXX is always skipped and there is no way
+# how while can stop.
+# This is just a hotfix with and ugly alias while="XXX; while YYY && "
+# There must be a way how to do this properly, but I really don't have time for
+# this right now...
+# XXX TODO FIXME
+
+csfunc_while_false_guard() {
+
+	if [[ $BASH_COMMAND =~ ^csfunc_ ]] || [[ $csfunc_inside == 1 ]]; then
+		# echo ",while_guard: 0 (csfunc or inside)"
+		return 0
+	fi
+
+	if (( csfunc_catch_command == 1 )); then
+		# echo ",while_guard: 1"
+		return 1
+	fi
+
+	# echo ",while_guard: 0"
+	return 0
+}
+
+# see alias "while" in cs_load.sh
+csfunc_while() {
+	cs_the_while=1
 }
 
 #-------------------------------------------------------------------------------
 
 csfunc_debug_trap() {
 	cs_debug_trap_rc=$?
+
+	# ethical fix for a problem. see csfunc_while
+	if [[ $cs_the_while == 1 ]]; then
+		cs_the_while=0
+
+		if [[ $BASH_COMMAND != csfunc_prompt ]]; then
+			# echo ",while: fixing while loop in debug trap. bc=$BASH_COMMAND"
+
+			csfunc_run_command_with_hooks "$(csfunc_lasthist)"
+
+			return 0
+		else
+			#echo ",while: was csfunc_prompt"
+			:
+		fi
+	fi
+
+	#echo ",debug trap. bc=$BASH_COMMAND lasthist=$(csfunc_lasthist) catch=$csfunc_catch_command"
 
 	# we set up -u before executing the command in eval. if we ctrl-c the command
 	# the -u flag is not unset and can cause problems
@@ -188,76 +243,7 @@ csfunc_debug_trap() {
 	if (( csfunc_catch_command == 1 )); then
 		csfunc_catch_command=0
 
-		# XXX lock
-		#csfunc_lock
-
-		# If we ctrlc this command, show the warning
-		cs_debug_trap_rc_ctrlc=0
-
-		# Get last command from history without its number
-		cmd=$(csfunc_lasthist)
-
-		# if debug mode is off, run the command
-		if [[ $cs_DEBUG == 0 ]]; then
-
-			# generate timestamp and use it as command identifier (for hooks)
-			cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
-
-			# Any _before hook can prevent command execution
-			if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
-
-				echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> "$CSLOG"
-
-				csfunc_dbg_echo ",dt: cmd to run: \"$cmd\" (from $BASH_COMMAND)"
-
-				#-------------------------------------------------------------------
-				# This is where the commands are executed.
-				# First, we want to exetuce a "blank" command to set the $_ variable.
-				# Second, the actual command is executed.
-				# Third, we want to save both $_ and $? variables.
-
-				# ok here is a problem with quoting cs_last. if it's a ", it will
-				# want to eval """ which is bad and ends with an error
-				# we need to escape that somewhat smart
-				# or maybe this will be sufficent.
-				# the problematic code is f.ex.:
-				# echo \"
-				# echo a
-
-				# TODO XXX: check this again
-				cs_last="$(printf "%q" "$cs_last")"
-
-				eval "
-	set -u
-	csfunc_restore_internals $cs_rc \"$cs_last\"
-
-	$cmd
-
-	cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
-	set +u
-				"
-
-		#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
-
-				# the cs_bash_internals variable is set in the eval block
-				# shellcheck disable=SC2154
-				cs_rc=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $2 }')
-				# shellcheck disable=SC2034
-				cs_last=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $1 }')
-
-				echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> "$CSLOG"
-
-				# FIXME: multiline commands?
-				#echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
-
-				csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
-			fi
-		else
-			echo ",: commash prevented execution of: \"$cmd\""
-			echo ",: going to the debugger mode"
-
-			cs_DEBUGGER=1
-		fi # cs_DEBUG == 0
+		csfunc_run_command_with_hooks "$(csfunc_lasthist)"
 
 		cs_last_lineno=$cs_lineno
 	fi
@@ -266,6 +252,89 @@ csfunc_debug_trap() {
 
 	return 1
 }
+
+
+csfunc_run_command_with_hooks() {
+	cmd="$1"
+
+	# echo ",csfunc_run_command_with_hooks = $cmd"
+
+	# if [[ $cmd =~ while ]]; then
+	# 		echo "cmd=$cmd"
+	# fi
+
+	# XXX lock
+	#csfunc_lock
+
+	# If we ctrlc this command, show the warning
+	cs_debug_trap_rc_ctrlc=0
+
+	# Get last command from history without its number
+
+
+	# if debug mode is off, run the command
+	if [[ $cs_DEBUG == 0 ]]; then
+
+		# generate timestamp and use it as command identifier (for hooks)
+		cs_timestamp=$(date +%Y-%m-%d-%H-%M-%S-%N)
+
+		# Any _before hook can prevent command execution
+		if csfunc_hook_iterate_before "$cs_timestamp" "$cmd"; then
+
+			echo "[CSLOG|$cs_timestamp|cmd|\"$cmd\"]" >> "$CSLOG"
+
+			csfunc_dbg_echo ",dt: cmd to run: \"$cmd\" (from $BASH_COMMAND)"
+
+			#-------------------------------------------------------------------
+			# This is where the commands are executed.
+			# First, we want to exetuce a "blank" command to set the $_ variable.
+			# Second, the actual command is executed.
+			# Third, we want to save both $_ and $? variables.
+
+			# ok here is a problem with quoting cs_last. if it's a ", it will
+			# want to eval """ which is bad and ends with an error
+			# we need to escape that somewhat smart
+			# or maybe this will be sufficent.
+			# the problematic code is f.ex.:
+			# echo \"
+			# echo a
+
+			# TODO XXX: check this again
+			cs_last="$(printf "%q" "$cs_last")"
+
+			eval "
+set -u
+csfunc_restore_internals $cs_rc \"$cs_last\"
+
+$cmd
+
+cs_bash_internals=\"\${_}CSDELIMETER\${?}\"
+set +u
+			"
+
+	#>(cs_add_timestamp "out") 2>(cs_add_timestamp "err" >&2)
+
+			# the cs_bash_internals variable is set in the eval block
+			# shellcheck disable=SC2154
+			cs_rc=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $2 }')
+			# shellcheck disable=SC2034
+			cs_last=$(echo "$cs_bash_internals" | awk -F "CSDELIMETER" '{ print $1 }')
+
+			echo "[CSLOG|$cs_timestamp|rc|$cs_rc]" >> "$CSLOG"
+
+			# FIXME: multiline commands?
+			#echo "$cs_timestamp \"$cmd\" $cs_rc $(pwd)" >> $cs_LOGFILE
+
+			csfunc_hook_iterate_after "$cs_timestamp" "$cmd"
+		fi
+	else
+		echo ",: commash prevented execution of: \"$cmd\""
+		echo ",: going to the debugger mode"
+
+		cs_DEBUGGER=1
+	fi # cs_DEBUG == 0
+}
+
 
 #-------------------------------------------------------------------------------
 
