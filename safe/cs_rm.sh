@@ -165,18 +165,38 @@ csfunc_rm_trash_files() {
 		return
 	fi
 
-	#echo ",rm: leftovers=$leftovers"
+	local files_removed=0
+
+	echo "$(csfunc_lasthist)" >> "$trashfile"
+	echo $PWD >> "$trashfile"
 
 	for f in "${leftovers[@]}"; do
-		echo ",rm trash: trashing file $(realpath "$f")" # XXX XXX
-		if ! trash-put "$f"; then
-			echo "rm trash: trash-put \"$f\" has failed"
+		echo -n ",rm trash: trying to trash: \"$(realpath "$f")\" " # XXX XXX
+
+		local lsout=$(ls -ld $(realpath "$f"))
+
+		if [[ -d "$f" ]] && (( opt_d + opt_r == 0 )); then
+			echo
+			echo ",rm trash: \"$f\" is a directory, try again with -r of -f"
+			continue
 		fi
 
-		realpath "$f" >> "$trashfile"
+		if trash-put "$f"; then
+			echo $lsout >> "$trashfile"
+			echo "ok"
+			(( files_removed++ ))
+		else
+			echo
+			echo "rm trash: trash-put \"$f\" has failed"
+		fi
 	done
 
-	echo ",rm trash: Done. Use ,t or ,trash handle trashed bundles"
+	if (( files_removed == 0 )); then
+		echo ",rm trash: No files removed."
+		/bin/rm -f "$trashfile"
+	else
+		echo ",rm trash: Done. Use ,t or ,trash handle trashed bundles"
+	fi
 }
 
 
@@ -204,20 +224,24 @@ csfunc_rm_show_trashed_bundles() {
 		if (( show <= 0 )) || (( ( now - timestamp ) < show )); then
 			echo -n "    [$i] "
 			rms[$i]=$t
-			echo -n "$ry.$rm.$rd $rH:$rM:$rS: "
+
 
 			# XXX: This is very simple. I really want something more complex
 			local cnt=0
 			while IFS='' read -r line || [[ -n "$line" ]]; do
-				if (( cnt < 1 )); then
-					echo -n "$line "
+				if (( cnt == 0 )); then
+						echo -n "\"$line\" "
+				fi
+				if (( cnt == 1 )); then
+					echo -n "from: $line "
 				fi
 				cnt=$(( cnt + 1 ))
 			done < "$f"
-			if (( cnt > 3 )); then
-				echo -n "and $cnt others"
-			fi
+			# if (( cnt > 3 )); then
+			# 	echo -n "and $cnt others"
+			# fi
 
+			echo -n "at $ry.$rm.$rd $rH:$rM:$rS"
 
 			# csfunc_rm_show_dirs "$f"
 			echo
@@ -249,6 +273,8 @@ csfunc_rm_list_trash() {
 		echo ",trash: no files in trash"
 		return
 	fi
+
+	echo ",rm: This is a wrapper. Real trash is located at ~/.local/share/Trash"
 
 	while :; do # menu loop begin
 		echo ",rm: Choose the bundle:"
@@ -285,8 +311,14 @@ csfunc_rm_list_trash() {
 									;;
 								s)
 									echo "Showing all deleted files:"
+									local cnt=0
 									while IFS='' read -r l || [[ -n "$l" ]]; do
-												echo "    $l"
+										(( cnt++ ))
+										if (( cnt < 3 )); then
+											continue
+										fi
+										echo "    $l"
+
 									done < "$chosen_file"
 									break
 									;;
@@ -294,6 +326,7 @@ csfunc_rm_list_trash() {
 									echo "restore"
 
 									while IFS='' read -r l || [[ -n "$l" ]]; do
+										l=$(echo "$l" | awk '{print $NF}')
 										echo ",rm: restoring $l"
 										csfunc_trashcli_restore "$l"
 									done < "$chosen_file"
@@ -305,6 +338,7 @@ csfunc_rm_list_trash() {
 								d)
 									echo "discard"
 									while IFS='' read -r l || [[ -n "$l" ]]; do
+										l=$(echo "$l" | awk '{print $NF}')
 										echo ",rm: discarding $l"
 										csfunc_trashcli_discard "$l"
 									done < "$chosen_file"
@@ -373,7 +407,9 @@ csfunc_rm_show_to_delete() {
 
 		if [[ -d "$f" ]]; then
 			# TODO: add check if we run rm with -d for empty dirs or with -r
-			echo ",rm:    Directory: \"$f\""
+
+
+			echo ",rm:    Directory: \"$f\" (with $(( $(find "$f" -maxdepth 1 | wc -l) - 1 )) files)"
 			continue
 		fi
 
@@ -417,8 +453,8 @@ csfunc_rm_cswrapp()  {
 #-------------------------------------------------------------------------------
 
 	# options
-	# local opt_d=0	# removedir
-	# local opt_r=0 # recursive
+	local opt_d=0	# removedir
+	local opt_r=0 # recursive
 	# local opt_f=0 # force
 	local opt_i_always=0 # interactive
 	local opt_i_sometimes=0
@@ -449,10 +485,9 @@ csfunc_rm_cswrapp()  {
 	                    fi
 	                    ;;
 	            esac;;
-	        d)
-						echo ",rm: todo removedir"
-	            # removedir=1
-	            ;;
+					d)
+						opt_d=1
+						;;
 					f)
 						#echo "force"
 						:
@@ -464,8 +499,7 @@ csfunc_rm_cswrapp()  {
 						opt_i_sometimes=1
 						;;
 					r|R)
-						#echo "recursive"
-						:
+						opt_r=1
 						;;
 	        v)
 	            echo "Parsing option: '-${optchar}'" >&2
