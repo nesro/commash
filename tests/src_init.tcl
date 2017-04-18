@@ -11,6 +11,10 @@ if { $basharg == "norc"} {
 	spawn bash
 	send "echo \"\$cs_ENABLED\$cs_VERSION_LONG\"\n"
 	expect {
+		timeout {
+        puts "CS_EXPECT_TIMEOUT src_init.tcl"
+        exp_continue
+    }
 		"1Commash" {
 			puts "\nCommash is running!"
 		}
