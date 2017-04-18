@@ -72,6 +72,14 @@ csfunc_trashcli_discard() {
 
 #-------------------------------------------------------------------------------
 
+csfunc_trash_discard() {
+	rm -fr ~/.commash/trash/* ~/.commash/trash/.* 2>/dev/null
+	rm -fr ~/.local/share/Trash/*
+}
+alias ,trash_discard="csfunc_trash_discard"
+
+#-------------------------------------------------------------------------------
+
 # We don't want the user to get used to the "safe" version of rm.
 # This function gets aliased to rm from cs_safe.sh
 csfunc_rm() {
@@ -325,10 +333,17 @@ csfunc_rm_list_trash() {
 								r)
 									echo "restore"
 
+									local cnt=0
 									while IFS='' read -r l || [[ -n "$l" ]]; do
+										(( cnt++ ))
+										if (( cnt < 3 )); then
+											continue
+										fi
 										l=$(echo "$l" | awk '{print $NF}')
 										echo ",rm: restoring $l"
-										csfunc_trashcli_restore "$l"
+										if ! csfunc_trashcli_restore "$l"; then
+											echo ",rm: restoring \"$l\" has failed"
+										fi
 									done < "$chosen_file"
 									mv "$cs_TRASHDIR"/{,.restored-}"${rms[$n]}"
 
