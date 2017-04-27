@@ -48,6 +48,8 @@ rm wrapper shows you which files are you going to delete and can put them in a t
 
 ![script_debugger_v0](./miscs/script_debugger_v0.png)
 
+![script_debugger_v1](./miscs/script_debugger_v1.png)
+
 # diploma thesis
 This work is being done as my diploma thesis, here are instructions in the czech language:
  - czech title: Comma-shell, interaktivní debugger shellu
