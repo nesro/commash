@@ -581,7 +581,7 @@ csfunc_rm_cswrapp()  {
 		echo ",rm:    [r]emove files"
 		echo ",rm:    [q]uit"
 		echo ",rm:    [t]rash files"
-		echo ",rm:    [s]how all files"
+		echo ",rm:    [s]how more files"
 		#echo ",rm:    [d]elayed removal"
 
 		# echo ",rm: rm $save_opts"
@@ -606,7 +606,24 @@ csfunc_rm_cswrapp()  {
 				return
 				;;
 			s)
-				echo ",rm: all files: ${leftovers[@]}"
+				#echo ",rm: all files: ${leftovers[@]}"
+
+				# show only content of first level directories
+				echo ",rm: all files:"
+				for i in "${leftovers[@]}"; do
+					if [[ -d "$i" ]]; then
+						echo "    $i (,: directory with $(( $(find "$i" -maxdepth 1 | wc -l) - 1 )) files)"
+						for j in ./$i/*; do
+							if [[ -d "$j" ]]; then
+								echo "        $j (,: directory with $(( $(find "$j" -maxdepth 1 | wc -l) - 1 )) files)"
+							else
+								echo "        $j"
+							fi
+						done
+					else
+						echo "    $i"
+					fi
+				done
 				break
 				;;
 			*)
