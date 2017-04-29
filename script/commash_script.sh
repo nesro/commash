@@ -20,9 +20,19 @@ main() {
 	for (( cs_dbg_i=0 ; cs_dbg_i < 10000 ; cs_dbg_i++ )); do
 
 		echo -e "\n,dbg: Next command:\n"
-		bashlex_out=$(./cs_script_debugger.py "$cs_dbg_i" <(grep -o '^[^#]*' $input_file))
+		bashlex_out="$(./cs_script_debugger.py "$cs_dbg_i" <(grep -o '^[^#]*' $input_file) "out")"
+		bashlex_eval="$(./cs_script_debugger.py "$cs_dbg_i" <(grep -o '^[^#]*' $input_file) "eval")"
+		bashlex_menu="$(./cs_script_debugger.py "$cs_dbg_i" <(grep -o '^[^#]*' $input_file) "menu")"
 
-		if [[ $ret == "CS_SCRIPT_END" ]]; then
+		echo "$bashlex_out"
+
+		echo ",dbg: Choose:"
+		echo "$bashlex_menu"
+		echo ",dbg:    [r]un"
+		echo ",dbg:    [q]quit	"
+		echo ",dbg:    [s]tep in"
+
+		if [[ $bashlex_eval == "CS_SCRIPT_END" ]]; then
 			echo ",script debugger: input ended"
 			break
 		fi
@@ -38,6 +48,13 @@ main() {
 					;;
 				q)
 					break 3
+					;;
+				s)
+					echo "[step in]
+$bashlex_out
+[/step in]"
+
+					break
 					;;
 				[0-9])
 					local to_eval="$( echo "$bashlex_out" | awk '/CS_DBG_MARK_BEGIN'$k'/{flag=1;next}/CS_DBG_MARK_END'$k'/{flag=0}flag' )"

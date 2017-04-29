@@ -12,12 +12,15 @@ from bashlex import parser, ast
 # global variables
 menucnt = 1
 cmd = ''
+cs_mode = ''
 
 #-------------------------------------------------------------------------------
 
 class pipenodevisitor(ast.nodevisitor):
 	def visitfor(self, n, parts):
 		global menucnt
+		global cs_mode
+
 		iterator=None
 		header_from=0
 		header_to=0
@@ -31,7 +34,8 @@ class pipenodevisitor(ast.nodevisitor):
 				iterator=part.word
 
 				#stderr = show
-				print(',dbg:    [' + str(menucnt) + '] show values of iterator: ' + iterator, file=sys.stderr)
+				if cs_mode == 'menu':
+					print(',dbg:    [' + str(menucnt) + '] show values of iterator: ' + iterator)
 				#menucnt += 1
 
 			# find the string representing the list of things we want to iterate
@@ -45,34 +49,37 @@ class pipenodevisitor(ast.nodevisitor):
 				header=cmd[header_from:header_to]
 				assert iterator != 'csit'
 
-				#stdout = eval
-				print('CS_DBG_MARK_BEGIN' + str(menucnt))
-				print('csit=0;for '+iterator+' in ' + header + '\ndo (( csit++ )); echo "( $csit ) '+iterator+' = $'+iterator+'"; done')
-				print('CS_DBG_MARK_END' + str(menucnt))
+				if cs_mode == 'eval':
+					print('CS_DBG_MARK_BEGIN' + str(menucnt))
+					print('csit=0;for '+iterator+' in ' + header + '\ndo (( csit++ )); echo "( $csit ) '+iterator+' = $'+iterator+'"; done')
+					print('CS_DBG_MARK_END' + str(menucnt))
 				menucnt += 1
 
 			if part.kind is 'list' or part.kind is 'command':
 				spaces = ' ' * (part.pos[0])
 				for_body=cmd[part.pos[0]:part.pos[1]]
 
-				#stderr = show
-				print(',dbg:    [' + str(menucnt) + '] run body with custom iterator: ' + iterator, file=sys.stderr)
+				if cs_mode == 'menu':
+					print(',dbg:    [' + str(menucnt) + '] run body with custom iterator: ' + iterator)
+
 				#stdout = eval
-				print('CS_DBG_MARK_BEGIN' + str(menucnt))
-				print('read -p ",dbg: set iterator \\"'+iterator+'\\" value: " '+iterator+'; '+for_body)
-				print('CS_DBG_MARK_END' + str(menucnt))
+				if cs_mode == 'eval':
+					print('CS_DBG_MARK_BEGIN' + str(menucnt))
+					print('read -p ",dbg: set iterator \\"'+iterator+'\\" value: " '+iterator+'; '+for_body)
+					print('CS_DBG_MARK_END' + str(menucnt))
 				menucnt += 1
 
-				#stderr = show
-				print(',dbg:    [' + str(menucnt) + '] step through iterations', file=sys.stderr)
-				#stdout = eval
-				print('CS_DBG_MARK_BEGIN' + str(menucnt))
-				print('csit=0\n'\
-					'for '+iterator+' in '+ header +'\ndo ' \
-					'(( csit++ ))\n' \
-					'echo ",dbg: $csit iteration, '+iterator+'=$'+iterator+'"\n' + \
-					for_body + \
-					"""
+				if cs_mode == 'menu':
+					print(',dbg:    [' + str(menucnt) + '] step through iterations')
+
+				if cs_mode == 'eval':
+					print('CS_DBG_MARK_BEGIN' + str(menucnt))
+					print('csit=0\n'\
+						'for '+iterator+' in '+ header +'\ndo ' \
+						'(( csit++ ))\n' \
+						'echo ",dbg: $csit iteration, '+iterator+'=$'+iterator+'"\n' + \
+						for_body + \
+						"""
 	while :; do
 		echo ",dbg: Choose: [n]ext, [b]reak"
 		while read -rsn1 k; do
@@ -92,7 +99,7 @@ class pipenodevisitor(ast.nodevisitor):
 	done
 """ \
 					'done')
-				print('CS_DBG_MARK_END' + str(menucnt))
+					print('CS_DBG_MARK_END' + str(menucnt))
 				menucnt += 1
 
 
@@ -106,37 +113,41 @@ if __name__ == '__main__':
 
 	cs_cnt=int(sys.argv[1])
 	cs_file=sys.argv[2]
+	cs_mode=sys.argv[3]
+
+	if cs_mode != "out" and cs_mode != "eval" and cs_mode != "menu":
+		print("cs_script_debugger.py: use \"out\" or \"eval\" as the 3rd arg", file=sys.stderr);
+		print(cs_mode, file=sys.stderr)
+		exit()
 
 	with open(cs_file, 'r') as myfile:
 		cmd = myfile.read()
 	parsed = parser.parse(cmd)
 
 	if False:
-		print("\n<script>", file=sys.stdout)
+		print("\n<script>")
 		print(cmd)
-		print("</script>", file=sys.stdout)
+		print("</script>")
 
 	if False:
-		print("\n<bashlex ast dump>", file=sys.stderr)
+		print("\n<bashlex ast dump>")
 		for p in parsed:
-			print(p.dump(), file=sys.stderr)
-		print("</bashlex ast dump>\n", file=sys.stderr)
+			print(p.dump())
+		print("</bashlex ast dump>\n")
 
 	if False:
-		print("\n<top lvl commands dump>", file=sys.stderr)
+		print("\n<top lvl commands dump>")
 		for p in parsed:
 			print('----------')
 			print(cmd[p.pos[0]:p.pos[1]])
-		print("</top lvl commands  dump>\n", file=sys.stderr)
+		print("</top lvl commands  dump>\n")
 
 	if cs_cnt >= len(parsed):
-		print("CS_SCRIPT_END", file=sys.stdout)
+		if cs_mode == 'eval':
+			print("CS_SCRIPT_END")
 	else:
-		print(cmd[parsed[cs_cnt].pos[0]:parsed[cs_cnt].pos[1]], file=sys.stderr)
-		print("", file=sys.stderr)
-		print(",dbg: Choose:", file=sys.stderr)
-		print(",dbg:    [r]un", file=sys.stderr)
-		print(",dbg:    [q]uit", file=sys.stderr)
+		if cs_mode == 'out':
+			print(cmd[parsed[cs_cnt].pos[0]:parsed[cs_cnt].pos[1]])
 
 		visitor = pipenodevisitor()
 		visitor.visit(parsed[cs_cnt])
