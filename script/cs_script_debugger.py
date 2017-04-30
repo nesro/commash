@@ -13,6 +13,7 @@ from bashlex import parser, ast
 menucnt = 1
 cmd = ''
 cs_mode = ''
+indent = ''
 
 #-------------------------------------------------------------------------------
 
@@ -70,7 +71,7 @@ class pipenodevisitor(ast.nodevisitor):
 				menucnt += 1
 
 				if cs_mode == 'menu':
-					print(',dbg:    [' + str(menucnt) + '] step through iterations')
+					print(',dbg:    [' + str(menucnt) + '] step through iterations with custom iterator: ' + iterator)
 
 				if cs_mode == 'eval':
 					print('CS_DBG_MARK_BEGIN' + str(menucnt))
@@ -103,6 +104,17 @@ class pipenodevisitor(ast.nodevisitor):
 				menucnt += 1
 
 
+				if cs_mode == 'menu':
+					print(',dbg:    [' + str(menucnt) + '] step in for body: ' + iterator)
+				if cs_mode == 'eval':
+					print('CS_DBG_MARK_BEGIN' + str(menucnt))
+					print('echo "'+indent+',dbg: stepping in for cycle"')
+					print('read -p "'+indent+',dbg: set iterator \\"'+iterator+'\\" value: " '+iterator)
+					print('csfunc_dbg_src \''+for_body+'\' ' + str(cs_indent + 1) )
+					print('echo "'+indent+',dbg: stepping out for cycle"')
+					print('CS_DBG_MARK_END' + str(menucnt))
+				menucnt += 1
+
 				#print(part, file=sys.stderr)
 				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
 		return True
@@ -114,20 +126,28 @@ if __name__ == '__main__':
 	cs_cnt=int(sys.argv[1])
 	cs_file=sys.argv[2]
 	cs_mode=sys.argv[3]
+	cs_indent=int(sys.argv[4])
+	indent = (cs_indent + 1) * '  '
+
 
 	if cs_mode != "out" and cs_mode != "eval" and cs_mode != "menu":
 		print("cs_script_debugger.py: use \"out\" or \"eval\" as the 3rd arg", file=sys.stderr);
 		print(cs_mode, file=sys.stderr)
 		exit()
 
-	with open(cs_file, 'r') as myfile:
-		cmd = myfile.read()
+	#with open(cs_file, 'r') as myfile:
+	#	cmd = myfile.read()
+	cmd=sys.argv[2]
 	parsed = parser.parse(cmd)
 
+
 	if False:
-		print("\n<script>")
-		print(cmd)
-		print("</script>")
+		print('cs_cnt='+str(cs_cnt)+',cs_mode='+str(cs_mode), file=sys.stderr);
+
+	if False:
+		print("<cmd>", file=sys.stderr)
+		print(cmd, file=sys.stderr)
+		print("</cmd>", file=sys.stderr)
 
 	if False:
 		print("\n<bashlex ast dump>")
