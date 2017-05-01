@@ -46,7 +46,7 @@ rm wrapper shows you which files are you going to delete and can put them in a t
 
 # script debugger
 
-Commash comes with a [Bashlex](https://github.com/idank/bashlex) based script debugger. It's not meant to be as powerful as [Bash Debugger](http://bashdb.sourceforge.net/), but easier and faster to use.
+Commash comes with a [Bashlex](https://github.com/idank/bashlex) based script debugger. It's not meant to be as powerful as [Bash Debugger](http://bashdb.sourceforge.net/), but rather easier and faster to use.
 
 ![script_debugger_v1](./miscs/script_debugger_v3.png)
 
