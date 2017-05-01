@@ -15,7 +15,7 @@ send "echo itis\$var\n"
 
 expect {
 	timeout {
-			puts "CS_EXPECT_TIMEOUT test_underscore.tcl"
+			puts "CS_EXPECT_TIMEOUT 1 test_shellcheck.tcl"
 			exp_continue
 	}
 	",: ShellCheck:" {
@@ -27,7 +27,7 @@ send "r"
 
 expect {
 	timeout {
-			puts "CS_EXPECT_TIMEOUT test_underscore.tcl"
+			puts "CS_EXPECT_TIMEOUT 2 test_shellcheck.tcl"
 			exp_continue
 	}
 	"itiscontent" {
