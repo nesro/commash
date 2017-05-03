@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # https://github.com/nesro/commash
 
+# FIXME: I need to make parsing the eval codes as same as in script debugger
+
 # READ THIS:
 #
 # commash bashlex wrapper:
@@ -120,12 +122,16 @@ class pipenodevisitor(ast.nodevisitor):
 		header_to=0
 		header=None
 		for_body=None
+		first_part=None
 
 		#spaces = ' ' * (n.pos[0])
 		# : '+ cmd[n.pos[0]:n.pos[1]]
 		#print(spaces + '^-- [' + str(menucnt) + '] for head', file=sys.stderr)
 
 		for part in parts:
+
+			if first_part == None:
+				first_part = ' ' * (part.pos[0])
 
 			# find the string representing the iterator
 			if part.kind is 'word' and iterator is None:
@@ -153,6 +159,10 @@ class pipenodevisitor(ast.nodevisitor):
 					file=sys.stderr)
 				print('read -p "set iterator \\"'+iterator+'\\" value: " '+iterator+'; '+for_body)
 				menucnt += 1
+
+				print(first_part + '^-- [' + str(menucnt) + '] step cycles', file=sys.stderr)
+				print('for '+iterator+' in '+header+'; do '+for_body+' read -rn1 -p ",: press any key to continue"; done')
+
 				#print(part, file=sys.stderr)
 				#print('part: '+ cmd[part.pos[0]:part.pos[1]], file=sys.stderr)
 

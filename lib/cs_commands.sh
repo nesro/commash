@@ -261,10 +261,11 @@ csfunc_debugger_next() {
 alias ,dnext="csfunc_debugger_next"
 
 csfunc_debugger_last() {
-	echo "debuggin last"
+	echo ",: debugging last command"
 	csfunc_debugger
 }
 alias ,d="csfunc_debugger_last"
+alias ,dlast="csfunc_debugger_last"
 
 #-------------------------------------------------------------------------------
 
