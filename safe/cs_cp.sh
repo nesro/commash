@@ -6,8 +6,12 @@
 
 # commash wrapper for the cp command
 # 1. warn and handle before overwriting files
-
 # 2. log cp commands and to revert them, just delete the copies
+
+# tests:
+#  touch a
+#  cp a b
+#  ,revert_cp
 
 #-------------------------------------------------------------------------------
 
@@ -26,6 +30,7 @@ csfunc_cp() {
 csfunc_cp_cswrapp() {
 
 	local save_opts=("$@")
+	local opt_r=0
 
 	OPTIND=1
 	optspec=":abdfHilLnprst:uvxPRS:TZ-:"
@@ -78,6 +83,7 @@ csfunc_cp_cswrapp() {
 						;;
 					r|R)
 						echo ",cp: r flag: copy directories recursively"
+						opt_r=1
 						;;
 					s)
 						echo ",cp: s flag: make symlinks instead of copying"
@@ -113,6 +119,9 @@ csfunc_cp_cswrapp() {
 
 	#-----------------------------------------------------------------------------
 
+# f f f f -> d
+# d -> d
+
 	local dest="${@: -1}"
 
 	# if the destination is a directory, look if there is the source name also
@@ -122,87 +131,67 @@ csfunc_cp_cswrapp() {
 			local arg="${!for_i}"
 			if [[ -f "$dest/$arg" ]]; then
 				echo ",cp: file $dest/$arg already exists"
-				echo ",cp: you can run: /bin/cp --backup=simple --suffix=.b to make a backup"
+				echo ",cp: you can run: /bin/cp -b to make a backup"
 			fi
 		done
-	else
+	elif [[ -f "$dest" ]]; then
 		# the destination is not a directory, it makes sense now if we only have 2 arguments
 		if (( $# != 2 )); then
-			echo ",cp: the destination is not a directory and you're copying more than 2 files"
+			echo ",cp: the destination is not a directory and you're copying more than 1 file"
 		fi
 
 		if [[ -f "$dest" ]]; then
 			echo ",cp: the destination $dest already exists."
 			echo ",cp: you can run: /bin/cp -b to make a backup"
 		fi
+	else # file doesn't exist
+		echo ",cp: destionation doesn't exit yet"
+
+		if (( $# != 2 )); then
+			echo ",cp: you cannot copy more than one file if the destionation doesn't exists"
+		fi
 	fi
 
-	echo -e ",cp: Do you want to run: \n/bin/cp "${save_opts[@]}""
-	read -rsn1
+	echo -e ",cp: Do you want to run: \n/bin/cp "${save_opts[@]}" [y/n]"
+	if csfunc_yesno; then
+		if /bin/cp "${save_opts[@]}"; then
+			ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
+			logfile=~/.commash/logs/cp-"$ts"
+			touch "$logfile"
+			echo "$(csfunc_lasthist)" > "$logfile"
+			echo $PWD >> "$logfile"
+			for (( for_i=1; for_i <= $# ; for_i++ )); do
+				local arg="${!for_i}"
 
-	ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
-	logfile=~/.commash/logs/cp-"$ts"
-	touch "$logfile"
-	echo "$(csfunc_lasthist)" > "$logfile"
-	echo $PWD >> "$logfile"
-	for (( for_i=1; for_i <= $# ; for_i++ )); do
-		local arg="${!for_i}"
+				# last arg is destination
+				# echo "arg=$arg"
 
-		# last arg is destination
-		echo "arg=$arg"
+				local lsout
 
-		local lsout=$(ls -ld $(realpath "$arg"))
-		echo "$lsout" >> "$logfile"
-	done
-
-	/bin/cp "${save_opts[@]}"
-
-
-	#-----------------------------------------------------------------------------
-
-# /bin/cp --backup=simple --suffix=".SUF" a b
+				if ls -ld "$arg" > /dev/null 2>&1; then
+					lsout=$(ls -ld $(realpath "$arg"))
+				else
+					lsout="CS_NEW $arg"
+				fi
+				echo "$lsout" >> "$logfile"
+			done
+		fi
+	fi
 }
 
 csfunc_revert_cp() {
+	echo ",cp: Choose the command to revert:"
+	if ! csfunc_safe_list_logs "cp"; then
+		return
+	fi
 
-	local i=1
-	for f in ~/.commash/logs/cp-*; do
-		t=${f##*/}
+	local logfile=~/.commash/logs/${csfunc_list_logs[$action]}
 
-		if [[ ! $t =~ cp-[0-9]* ]]; then
-			echo ",cp: invalid file in trash: $t"
-			return
-		fi
-
-		echo -n "    [$i] "
-		rms[$i]=$t
-
-		ry=$(echo "$t" | awk -F'-' '{ print $2 }')
-		rm=$(echo "$t" | awk -F'-' '{ print $3 }')
-		rd=$(echo "$t" | awk -F'-' '{ print $4 }')
-		rH=$(echo "$t" | awk -F'-' '{ print $5 }')
-		rM=$(echo "$t" | awk -F'-' '{ print $6 }')
-		rS=$(echo "$t" | awk -F'-' '{ print $7 }')
-		timestamp=$(date --date="$ry-$rm-$rd $rH:$rM:$rS" +"%s")
-
-		local cnt=0
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			if (( cnt == 0 )); then
-					echo -n "\"$line\" "
-			fi
-			if (( cnt == 1 )); then
-				echo -n "from: $line "
-			fi
-			cnt=$(( cnt + 1 ))
-		done < "$f"
-		echo -n "at $ry.$rm.$rd $rH:$rM:$rS"
-		echo ""
-	done
+	#echo "logfile=$logfile"
 
 	read -rsn1 action
 	#echo "choosen: $action ${rms[$action]}"
-	local total_lines="$(wc -l ~/.commash/logs/${rms[$action]} | awk '{ print $1 }')"
-
+	local total_lines="$(wc -l $logfile | awk '{ print $1 }')"
 
 	local dest=""
 	local src=""
@@ -210,31 +199,33 @@ csfunc_revert_cp() {
 	while IFS='' read -r line || [[ -n "$line" ]]; do
 		if (( cnt == total_lines - 1 )); then
 			local dest="$(echo $line | awk '{print $NF}')"
+
 			#echo "destination: $dest"
+
 		elif (( cnt > 1 )); then
 			src="$src $(echo $line | awk '{print $NF}')"
+
 			#echo "source: $(echo $line | awk '{print $NF}') "
+
 		fi
 		cnt=$(( cnt + 1 ))
-	done < "$f"
+	done < "$logfile"
 
 	if [[ -d $dest ]]; then
 		for s in $src; do
-				echo ",: Do you want to revert the change by removing $dest/$src?"
-				echo ",:    /bin/rm -f $dest/$s"
+				echo ",cp: Do you want to revert the change by removing $dest/$s? [y/n]"
+				echo ",cp:    /bin/rm -f $dest/$s"
 				if csfunc_yesno; then
 					/bin/rm -f $dest/$s
 				fi
 		done
 	fi
 	if [[ -f $dest ]]; then
-		for s in $src; do
-			echo ",: Do you want to revert the change by removing $dest?"
-			echo ",:    /bin/rm -f $dest/$s"
-			if csfunc_yesno; then
-				/bin/rm -fr $dest/$s
-			fi
-		done
+		echo ",cp: Do you want to revert the change by removing $dest? [y/n]"
+		echo ",cp:    /bin/rm $dest"
+		if csfunc_yesno; then
+			/bin/rm $dest
+		fi
 	fi
 }
 alias ,revert_cp="csfunc_revert_cp"

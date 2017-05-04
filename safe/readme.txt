@@ -1,3 +1,6 @@
+removing a file:
+	rm
+
 changing a file:
 	chgrp
 	chmod

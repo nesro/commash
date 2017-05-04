@@ -40,7 +40,7 @@ csfunc_load_settings() {
 }
 
 csfunc_yesno() {
-	while read -rn1 k; do
+	while read -rsn1 k; do
 		case "$k" in
 			y)
 				return 0

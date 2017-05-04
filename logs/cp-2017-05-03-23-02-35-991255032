@@ -1,4 +1,0 @@
-cp -b a b
-/tmp/cp
--rw-rw-r-- 1 n n 0 kvě  3 17:02 /tmp/cp/a
--rw-rw-r-- 1 n n 0 kvě  3 17:38 /tmp/cp/b

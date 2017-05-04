@@ -21,6 +21,9 @@ csfunc_lib_safe_load() {
 	#PATH="$cs_ROOTDIR/safe:$PATH"
 	# chmod +x /home/n/.commash/safe/*
 
+	source ~/.commash/safe/cs_safe_common.sh
+	mkdir -p ~/.commash/logs
+
 	for a in $cs_SAFE_COMMANDS; do
 		if [[ -f $cs_ROOTDIR/safe/cs_$a.sh ]]; then
 			# shellcheck source=/dev/null
