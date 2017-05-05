@@ -181,16 +181,41 @@ csfunc_cp_cswrapp() {
 
 csfunc_revert_cp() {
 	echo ",cp: Choose the command to revert:"
+
 	if ! csfunc_safe_list_logs "cp"; then
+		echo ",cp: No files in log."
 		return
 	fi
 
+	while read -rsn1 action; do
+		case $action in
+			[1-9])
+				if (( action >= csfunc_list_items )); then
+					echo ",cp: action out of range ($csfunc_list_items)"
+					continue
+				fi
+
+				break
+				;;
+			q)
+				return
+				;;
+			*)
+				echo ",cp: press 1-9 or q to quit"
+				;;
+		esac
+	done
+
 	local logfile=~/.commash/logs/${csfunc_list_logs[$action]}
 
-	#echo "logfile=$logfile"
+	if [[ -z "${csfunc_list_logs[$action]}" ]]; then
+		echo ",cp fatal error: csfunc_list_logs $action is empty? logfile=$logfile"
+		return
+	fi
 
-	read -rsn1 action
+	#echo "logfile=$logfile"
 	#echo "choosen: $action ${rms[$action]}"
+
 	local total_lines="$(wc -l $logfile | awk '{ print $1 }')"
 
 	local dest=""
