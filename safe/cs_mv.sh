@@ -1,40 +1,39 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
 
-# http://lingrok.org/xref/coreutils/src/cp.c
-# http://lingrok.org/xref/coreutils/tests/cp/
+# http://lingrok.org/xref/coreutils/src/mv.c
+# http://lingrok.org/xref/coreutils/tests/mv/
 
-# commash wrapper for the cp command
+# commash wrapper for the mv command
 # 1. warn and handle before overwriting files
-# 2. log cp commands and to revert them, just delete the copies
+# 2. log mv commands and to revert them, just move/rename them back
 
 # tests:
 #  touch a
-#  cp a b
-#  ,revert_cp
+#  mv a b
+#  ,revert_mv
 
 #-------------------------------------------------------------------------------
 
-csfunc_cp() {
-	if grep -q "cp" ~/.commash/settings/cs_safe_overwrite.txt; then
-		csfunc_cp_cswrapp "$@"
+csfunc_mv() {
+	if grep -q "mv" ~/.commash/settings/cs_safe_overwrite.txt; then
+		csfunc_mv_cswrapp "$@"
 	else
-		echo ",: Use ,cp for commash wrapper or /bin/cp for original cp."
+		echo ",: Use ,mv for commash wrapper or /bin/mv for original mv."
 		echo ",: If you want to overwrite this command, run:"
-		echo ',:     echo "cp" > ~/.commash/settings/cs_safe_overwrite.txt'
+		echo ',:     echo "mv" > ~/.commash/settings/cs_safe_overwrite.txt'
 	fi
 }
 
 #-------------------------------------------------------------------------------
 
-csfunc_cp_cswrapp() {
+csfunc_mv_cswrapp() {
 
 	local save_opts=("$@")
 	local opt_r=0
 	local opt_t=0
 	local opt_T=0
 	local dest=""
-
 
 	OPTIND=1
 	optspec=":abdfHilLnprst:uvxPRS:TZ-:"
@@ -58,61 +57,32 @@ csfunc_cp_cswrapp() {
 											fi
 											;;
 							esac;;
-					a)
-						echo ",cp: a flag: archive"
-						;;
 					b)
-						echo ",cp: b flag: create backup"
+						echo ",mv: b flag: create backup"
 						;;
 					f)
-						echo ",cp: f flag: force"
+						echo ",mv: f flag: force"
 						;;
 					i)
-						echo ",cp: i flag: interactive"
-						;;
-					H)
-						echo ",cp: H flag: follow command-line symlinks"
-						;;
-					l)
-						echo ",cp: l flag: hard link files instead of copying"
-						;;
-					L)
-						echo ",cp: L flag: follow symlinks"
-						;;
-					n)
-						echo ",cp: n flag: don't overwrite existing files"
-						;;
-					P)
-						echo ",cp: P flag: don't follow symlinks in so"
-						;;
-					r|R)
-						echo ",cp: r flag: copy directories recursively"
-						opt_r=1
-						;;
-					s)
-						echo ",cp: s flag: make symlinks instead of copying"
+						echo ",mv i flag: interactive"
 						;;
 					S)
-						echo ",cp: S flag: override suffix for backups"
+						echo ",mv: S flag: override suffix for backups"
 						;;
 					t)
-						opt_t=1
-						echo ",cp: t flag: copy into a directory, that is \"$OPTARG\""
+						echo ",mv: t flag: move into a directory"
 						dest="$OPTARG"
 						;;
 					T)
 						opt_T=1
-						echo ",cp: T flag: dest is a regular file"
+						echo ",mv: T flag: dest is a regular file"
 						# TODO
 						;;
 					u)
-						echo ",cp: u flag: update destination"
+						echo ",mv: u flag: update destination"
 						;;
 					v)
-						echo ",cp: v flag: verbose"
-						;;
-					x)
-						echo ",cp: x flag: stay on this filesystem"
+						echo ",mv: v flag: verbose"
 						;;
 					*)
 							if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
@@ -130,9 +100,6 @@ csfunc_cp_cswrapp() {
 
 	#-----------------------------------------------------------------------------
 
-# f f f f -> d
-# d -> d
-
 	if (( opt_t == 0 )); then
 		dest="${@: -1}"
 	fi
@@ -143,33 +110,33 @@ csfunc_cp_cswrapp() {
 		for (( for_i=1; for_i < $# ; for_i++ )); do
 			local arg="${!for_i}"
 			if [[ -f "$dest/$arg" ]]; then
-				echo ",cp: file $dest/$arg already exists"
-				echo ",cp: you can run: /bin/cp -b to make a backup"
+				echo ",mv: file $dest/$arg already exists"
+				echo ",mv: you can run: /bin/mv -b to make a backup"
 			fi
 		done
 	elif [[ -f "$dest" ]]; then
 		# the destination is not a directory, it makes sense now if we only have 2 arguments
 		if (( $# != 2 )); then
-			echo ",cp: the destination is not a directory and you're copying more than 1 file"
+			echo ",mv: the destination is not a directory and you're moving more than 1 file"
 		fi
 
 		if [[ -f "$dest" ]]; then
-			echo ",cp: the destination $dest already exists."
-			echo ",cp: you can run: /bin/cp -b to make a backup"
+			echo ",mv: the destination $dest already exists."
+			echo ",mv: you can run: /bin/mv -b to make a backup"
 		fi
 	else # file doesn't exist
-		echo ",cp: destionation doesn't exit yet"
+		echo ",mv: destionation doesn't exit yet"
 
 		if (( $# != 2 )); then
-			echo ",cp: you cannot copy more than one file if the destination doesn't exists"
+			echo ",mv: you cannot copy more than one file if the destination doesn't exists"
 		fi
 	fi
 
-	echo -e ",cp: Do you want to run: \n/bin/cp "${save_opts[@]}" [y/n]"
+	echo -e ",mv: Do you want to run: \n/bin/mv "${save_opts[@]}" [y/n]"
 	if csfunc_yesno; then
-		if /bin/cp "${save_opts[@]}"; then
+		if /bin/mv "${save_opts[@]}"; then
 			ts=$(date +%Y-%m-%d-%H-%M-%S-%N)
-			logfile=~/.commash/logs/cp-"$ts"
+			logfile=~/.commash/logs/mv-"$ts"
 			touch "$logfile"
 			echo "$(csfunc_lasthist)" > "$logfile"
 			echo $PWD >> "$logfile"
@@ -192,11 +159,11 @@ csfunc_cp_cswrapp() {
 	fi
 }
 
-csfunc_revert_cp() {
-	echo ",cp: Choose the command to revert:"
+csfunc_revert_mv() {
+	echo ",mv: Choose the command to revert:"
 
-	if ! csfunc_safe_list_logs "cp"; then
-		echo ",cp: No files in log."
+	if ! csfunc_safe_list_logs "mv"; then
+		echo ",mv: No files in log."
 		return
 	fi
 
@@ -204,7 +171,7 @@ csfunc_revert_cp() {
 		case $action in
 			[1-9])
 				if (( action > csfunc_list_items )); then
-					echo ",cp: action out of range ($csfunc_list_items)"
+					echo ",mv: action out of range ($csfunc_list_items)"
 					continue
 				fi
 
@@ -214,7 +181,7 @@ csfunc_revert_cp() {
 				return
 				;;
 			*)
-				echo ",cp: press 1-9 or q to quit"
+				echo ",mv: press 1-9 or q to quit"
 				;;
 		esac
 	done
@@ -222,7 +189,7 @@ csfunc_revert_cp() {
 	local logfile=~/.commash/logs/${csfunc_list_logs[$action]}
 
 	if [[ -z "${csfunc_list_logs[$action]}" ]]; then
-		echo ",cp fatal error: csfunc_list_logs $action is empty? logfile=$logfile"
+		echo ",mv fatal error: csfunc_list_logs $action is empty? logfile=$logfile"
 		return
 	fi
 
@@ -239,7 +206,6 @@ csfunc_revert_cp() {
 		if (( cnt == 1 )); then
 			from="$line"
 		fi
-
 		if (( cnt == total_lines - 1 )); then
 			local dest="$(echo $line | awk '{print $NF}')"
 
@@ -256,24 +222,24 @@ csfunc_revert_cp() {
 
 	if [[ -d $dest ]]; then
 		for s in $src; do
-				echo ",cp: Do you want to revert the change by removing $dest/$s? [y/n]"
-				echo ",cp:    /bin/rm -f $dest/$s"
+				echo ",mv: Do you want to revert the change by moving $dest/$s to $s? [y/n]"
+				echo ",mv:    (builtin cd $from && /bin/mv $dest/$s $s)"
 				if csfunc_yesno; then
-					/bin/rm -f $dest/$s
+					(builtin cd $from && /bin/mv $dest/$s $s)
 				else
 					return
 				fi
 		done
 	fi
 	if [[ -f $dest ]]; then
-		echo ",cp: Do you want to revert the change by removing $dest? [y/n]"
-		echo ",cp:    /bin/rm $dest"
+		echo ",mv: Do you want to revert the change by moving $dest to $src? [y/n]"
+		echo ",mv:    (builtin cd $from && /bin/mv $dest $src)"
 		if csfunc_yesno; then
-			/bin/rm $dest
+			(builtin cd $from && /bin/mv $dest $src)
 		else
 			return
 		fi
 	fi
 	/bin/mv $logfile ~/.commash/logs/.reverted-${csfunc_list_logs[$action]}
 }
-alias ,revert_cp="csfunc_revert_cp"
+alias ,revert_mv="csfunc_revert_mv"

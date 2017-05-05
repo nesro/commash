@@ -10,16 +10,16 @@ csfunc_safe_list_logs() {
 	local i=1
 	for f in ~/.commash/logs/"$arg_cmd"-*; do
 
-		if [[ $f == "~/.commash/logs/"$arg_cmd"-*" ]]; then
+		if [[ $f =~ ".commash/logs/"$arg_cmd"-*" ]]; then
 			return 1
 		fi
 
 		t=${f##*/}
 
-		#echo "$f, $t"
+		# echo "$f, $t"
 
-		if [[ ! $t =~ cp-[0-9]* ]]; then
-			echo ",cp: invalid file in trash: $t"
+		if [[ ! $t =~ "$arg_cmd"-[0-9]* ]]; then
+			echo ","$arg_cmd": invalid file in trash: $t"
 			return
 		fi
 
