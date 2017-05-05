@@ -13,7 +13,7 @@
 # cs_SED=$(which sed)
 # cs_TAIL=$(which tail)
 
-cs_SAFE_COMMANDS="cd rm cp mv"
+cs_SAFE_COMMANDS="cd rm cp mv chmod"
 
 csfunc_lib_safe_load() {
 	# XXX: we will not modify the PATH variable.
@@ -22,6 +22,7 @@ csfunc_lib_safe_load() {
 	# chmod +x /home/n/.commash/safe/*
 
 	source ~/.commash/safe/cs_safe_common.sh
+	source ~/.commash/safe/cs_ch_common.sh
 	mkdir -p ~/.commash/logs
 
 	for a in $cs_SAFE_COMMANDS; do
@@ -29,6 +30,7 @@ csfunc_lib_safe_load() {
 			# shellcheck source=/dev/null
 			source "$cs_ROOTDIR/safe/cs_$a.sh"
 			eval "alias \$a=\"csfunc_\$a\""
+			eval "alias ,\$a=\"csfunc_\$a\"_cswrapp"
 		else
 			>&2 echo ",error: no file for alias $a"
 		fi
