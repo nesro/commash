@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 # https://github.com/nesro/commash
 
-# http://lingrok.org/xref/coreutils/src/chmod.c
+# http://lingrok.org/xref/coreutils/src/chown.c
 
-csfunc_chmod() {
-	if grep -q "chmod" ~/.commash/settings/cs_safe_overwrite.txt; then
-		csfunc_ch_cswrapp "chmod" "$@"
+csfunc_chown() {
+	if grep -q "chown" ~/.commash/settings/cs_safe_overwrite.txt; then
+		csfunc_ch_cswrapp "chown" "$@"
 	else
-		echo ",: Use ,chmod for commash wrapper or /bin/chmod for original chmod."
+		echo ",: Use ,chown for commash wrapper or /bin/chown for original chmod."
 		echo ",: If you want to overwrite this command, run:"
-		echo ',:     echo "chmod" > ~/.commash/settings/cs_safe_overwrite.txt'
+		echo ',:     echo "chown" > ~/.commash/settings/cs_safe_overwrite.txt'
 	fi
 }
 
-csfunc_chmod_cswrapp() {
-	csfunc_ch_cswrapp "chmod" "$@"
+csfunc_chown_cswrapp() {
+	csfunc_ch_cswrapp "chown" "$@"
 }
 
-csfunc_revert_chmod() {
-	echo ",chmod: Choose the command to revert:"
+csfunc_revert_chown() {
+	echo ",chown: Choose the command to revert:"
 
-	if ! csfunc_safe_list_logs "chmod"; then
-		echo ",chmod: No files in log."
+	if ! csfunc_safe_list_logs "chown"; then
+		echo ",chown: No files in log."
 		return
 	fi
 
@@ -29,7 +29,7 @@ csfunc_revert_chmod() {
 		case $action in
 			[1-9])
 				if (( action > csfunc_list_items )); then
-					echo ",chmod: action out of range ($csfunc_list_items)"
+					echo ",chown: action out of range ($csfunc_list_items)"
 					continue
 				fi
 
@@ -39,7 +39,7 @@ csfunc_revert_chmod() {
 				return
 				;;
 			*)
-				echo ",chmod: press 1-9 or q to quit"
+				echo ",chown: press 1-9 or q to quit"
 				;;
 		esac
 	done
@@ -47,7 +47,7 @@ csfunc_revert_chmod() {
 	local logfile=~/.commash/logs/${csfunc_list_logs[$action]}
 
 	if [[ -z "${csfunc_list_logs[$action]}" ]]; then
-		echo ",chmod fatal error: csfunc_list_logs $action is empty? logfile=$logfile"
+		echo ",chown fatal error: csfunc_list_logs $action is empty? logfile=$logfile"
 		return
 	fi
 
@@ -70,16 +70,14 @@ csfunc_revert_chmod() {
 		cnt=$(( cnt + 1 ))
 	done < "$logfile"
 
-	getfacl_file="$(echo "$logfile" | sed 's/chmod/getfacl/')"
-
-	echo ",chmod: do you want to restore the chmod? [y/n]"
-	echo ",chmod:    setfacl --restore=$getfacl_file"
+	echo ",chown: do you want to restore the chown? [y/n]"
+	echo ",chown:    restoring from perm file"
 	if csfunc_yesno; then
-		setfacl --restore=$getfacl_file
-
+		local perm_log="$(echo $logfile | sed 's/chown/perm/')"
+		csfunc_restore_perm "$from" "$perm_log"
 		/bin/mv $logfile ~/.commash/logs/.reverted-${csfunc_list_logs[$action]}
 	else
 		return
 	fi
 }
-alias ,revert_chmod="csfunc_revert_chmod"
+alias ,revert_chown="csfunc_revert_chown"
