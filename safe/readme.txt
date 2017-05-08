@@ -9,5 +9,7 @@ changing a file:
 rewriting a file:
 	cp - log destination
 	mv - log destination
-	ln  (TBD)
-	mkdir (TBD)
+
+not doing yet (because there no reason atm)
+	ln - this is fine too
+	mkdir - this commmand is fine

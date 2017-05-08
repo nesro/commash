@@ -55,6 +55,23 @@ csfunc_ch_cswrapp() {
 			return
 		fi
 	fi
+
+	if [[ $cmd == "chgrp" ]]; then
+		echo ",chgrp: Do to want to run: [y/n]"
+		echo ",chgrp:    /bin/chgrp ${save_opts[@]}"
+		if csfunc_yesno; then
+			if /bin/chgrp "${save_opts[@]}"; then
+				logfile=~/.commash/logs/chgrp-"$ts"
+				touch "$logfile"
+				echo "$(csfunc_lasthist)" > "$logfile"
+				echo $PWD >> "$logfile"
+			else
+				echo ",chgrp: it failed"
+			fi
+		else
+			return
+		fi
+	fi
 }
 
 #-------------------------------------------------------------------------------

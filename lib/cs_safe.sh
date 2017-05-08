@@ -13,7 +13,7 @@
 # cs_SED=$(which sed)
 # cs_TAIL=$(which tail)
 
-cs_SAFE_COMMANDS="cd rm cp mv chmod chown"
+cs_SAFE_COMMANDS="cd rm cp mv chmod chown chgrp"
 
 csfunc_lib_safe_load() {
 	# XXX: we will not modify the PATH variable.
