@@ -116,7 +116,7 @@ cshook_nofound_nohistory_after() {
 			echo ",notfound: [p]re-type edited"
 		fi
 		echo ",notfound: [s]uggest package for \"$cmdcmd\""
-		echo ",notfound: [r]emove command from hisory"
+		echo ",notfound: [r]emove command from history"
 		while read -rn1 k; do
 			echo
 			case "$k" in

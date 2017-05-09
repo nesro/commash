@@ -128,6 +128,7 @@ csfunc_install_commash() {
 
 	# TODO: add check if .bash_logout exists
 	echo ",install: running command: \"sed -i \"1i$cs_LOGOUT_HOOK\" ~/.bash_logout\""
+	touch ~/.bash_logout
 	if ! sed -i "1i$cs_LOGOUT_HOOK" ~/.bash_logout; then
 		echo ",: There is a problem writing into your ~/.bash_logout"
 		return 1

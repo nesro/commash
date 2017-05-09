@@ -4,12 +4,42 @@
 # feeling brave? try to run:
 # set -T;trap : DEBUG;:&&:&
 
+# welcome
+echo ",:"
+echo ",: Welcome to Comma-shell! Please note that there may be bugs. " \
+	"Don't hesitate to contact me at: nesro@nesro.cz"
+echo ",:"
+
 # if you want to disable commash for a new bash instance:
 # env cs_DISABLED=1 bash
 cs_DISABLED=${cs_DISABLED:-}
 if [[ -n "${cs_DISABLED}" ]]; then
 	>&2 echo ",: commash is disabled"
 	return 0
+fi
+
+
+# version checking
+cs_VERSION="$(cat ~/.commash/VERSION)"
+if ! type wget >/dev/null 2>&1; then
+	echo ",version: version was not checked, because wget is missing"
+	sleep 1
+fi
+if ! cs_VERSION_tmp="$(wget https://raw.githubusercontent.com/nesro/commash/master/VERSION -q -O -)"; then
+	echo ",: !!!"
+	echo ",version: version was not checked, cannot wget https://raw.githubusercontent.com/nesro/commash/master/VERSION"
+	echo ",: !!!"
+	sleep 3
+else
+	if [[ "$cs_VERSION_tmp" != "$cs_VERSION" ]]; then
+		echo ",version: You use old version of Comma-shell!"
+		echo ",version: Your version: $cs_VERSION"
+		echo ",version: Latest version: $cs_VERSION_tmp"
+		echo ",version: Please download latest version:"
+		echo "    git pull"
+		echo ""
+		sleep 1
+	fi
 fi
 
 if [[ -n "$cs_XTRACE" ]]; then
@@ -37,7 +67,6 @@ fi
 
 #-------------------------------------------------------------------------------
 
-cs_VERSION=0.0.0
 # shellcheck disable=SC2034
 cs_VERSION_LONG="Commash - version $cs_VERSION"
 
