@@ -18,7 +18,16 @@ Comma-shell (commash) - an interactive shell debugger and helper
 ,dnext - debug just the next command
 ,d - debug the last command
 
-(i will add more later)
+2) safe commands
+Currently implemented: rm, mv, cp, chmod, chown, chgrp
+Run them with prefix , (such as: ,rm)
+
+3) hooks:
+Look into ~/.commash/hooks/ what's implemented.
+The most important now is the ShellCheck one.
+
+If you have any questions, please contact me at:
+nesro@nesro.cz
 
 EOF
 
