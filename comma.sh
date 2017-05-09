@@ -38,7 +38,22 @@ else
 		echo ",version: Please download latest version:"
 		echo "    git pull"
 		echo ""
-		sleep 1
+
+		# echo -e
+		while read -r -n1 -p "Do you want to update now? [y/n]"  cs_update_read; do
+			echo ""
+			case $cs_update_read in
+				y|Y)
+					git pull
+					;;
+				n|N|q|Q)
+					break 2
+					;;
+				*)
+					echo "press y or n"
+					;;
+			esac
+		done
 	fi
 fi
 
