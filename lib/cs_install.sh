@@ -24,29 +24,12 @@ csfunc_install_xdotools() {
 }
 
 csfunc_install_shellcheck() {
-	csfunc_var cs_SHELLCHECK
 
 	#TODO: include some general shellcheck file that have the path as a variable
 	if [[ ! -x $cs_SHELLCHECK ]]; then
-		echo ",install: installing ShellCheck"
-
-		echo ",install: running command: \"cabal update\""
-		if ! cabal update; then
-			echo ",install: command \"cabal update\" failed"
-			return 1
-		fi
-
-		echo ",install: running command: \"cabal install regex-tdfa\""
-		if ! cabal install regex-tdfa; then
-			echo ",install: command \"cabal install regex-tdfa\" failed"
-			return 1
-		fi
-
-		echo ",install: running command: \"cabal install shellcheck\""
-		if ! cabal install shellcheck; then
-			echo ",install: command \"cabal install shellcheck\" failed"
-			return 1
-		fi
+		echo ",install: ShellCheck is not installed"
+		echo ",install: run: sudo apt install shellcheck"
+		return 1
 	fi
 
 	return 0

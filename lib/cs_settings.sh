@@ -50,7 +50,7 @@ cs_RC_HOOK="if [[ -f $cs_COMMA_SH ]]; then source $cs_COMMA_SH; fi"
 cs_RC_HOOK_GREP="if \[\[ -f $cs_COMMA_SH \]\]\; then source $cs_COMMA_SH\; fi"
 cs_RC_HOOK_SED=$(echo "$cs_RC_HOOK_GREP" | escape_sed)
 cs_LOGOUT_HOOK="cs_LOGOUT=1"
-cs_SHELLCHECK=~/.cabal/bin/shellcheck
+cs_SHELLCHECK=$(which shellcheck)
 
 # cs_LOCKFILE=/var/lock/commash
 # cs_LOGFILE=$cs_ROOTDIR/log.commash

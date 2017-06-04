@@ -7,7 +7,7 @@ You can found my Virtualbox setup at the end of this README.
 Install dependencies, clone commash into your home directory and run the main file. The rest will be installed automatically. Please note, that building ShellCheck takes a lot of time.
 
     sudo apt update
-    sudo apt install git cabal-install python-pip xdotool -y
+    sudo apt install git shellcheck python-pip xdotool -y
     sudo pip install bashlex
     git clone https://github.com/nesro/commash ~/.commash
     source ~/.commash/comma.sh
