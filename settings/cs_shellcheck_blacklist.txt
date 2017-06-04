@@ -5,3 +5,4 @@
 2164 # "Use cd ... || exit in case cd fails."
 2154 # "var is referenced but not assigned."
 2034 # "foo appears unused. Verify it or export it."
+2035 # "Use ./*glob* or -- *glob* so names with dashes won't become options."
