@@ -183,10 +183,12 @@ csfunc_rm_trash_files() {
 
 		local lsout=$(ls -ld $(realpath "$f"))
 
-		if [[ -d "$f" ]] && (( opt_d + opt_r == 0 )); then
-			echo
-			echo ",rm trash: \"$f\" is a directory, try again with -r of -f"
-			continue
+		if [[ -d "$f" ]]; then
+			if [[ $opt_r == 0 ]]; then
+				echo
+				echo ",rm trash: \"$f\" is a directory, try again with -r of -f .."
+				continue
+			fi
 		fi
 
 		if trash-put "$f"; then
